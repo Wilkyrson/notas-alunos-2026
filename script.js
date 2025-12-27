@@ -58,7 +58,7 @@ function buscarNotas() {
     
     // Validação básica
     if (!nome || !cpf) {
-        mostrarErro('Preencha nome e CPF.');
+        mostrarErro('Por favor, preencha todos os campos.');
         return;
     }
     
@@ -159,8 +159,7 @@ function exibirResultados(aluno) {
 function mostrarErro(mensagem) {
     document.getElementById('erro').innerHTML = `
         <i class="fas fa-exclamation-triangle"></i>
-        <h3>❌ Aluno não encontrado</h3>
-        <p>Verifique se o nome e CPF estão corretos.</p>
+        <h3>${mensagem}</h3>
     `;
     document.getElementById('erro').style.display = 'block';
 }
