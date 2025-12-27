@@ -1,10 +1,10 @@
 // BANCO DE DADOS SIMPLES PARA TESTE
 const bancoDeAlunos = [
     {
-        nome: "MARIA SILVA SANTOS",
-        cpf: "123.456.789-00",
+        nome: "JOÃO PEDRO PANTOJA RABELO",
+        cpf: "080.023.542-81",
         matricula: "20240001",
-        escola: "Escola Teste",
+        escola: "Escola Conexão Aquarela",
         nivel: "Nível 3",
         notas: {
             fase1: { nota: 18.5, acertos: 20, posicao: "Classificado" },
@@ -12,7 +12,22 @@ const bancoDeAlunos = [
             simulados: { nota: 85.0, media_turma: 72.5 },
             treinamentos: { nota: 90.0, participacao: "100%" }
         },
-        premiacoes: ["Medalha de Bronze 2023"]
+        premiacoes: ["Medalha de ouro 2026"]
+       },  // ← VÍRGULA do aluno anterior
+    
+    {   // ← Início do NOVO aluno
+        nome: "",
+        cpf: "CPF.AQUI-00",
+        matricula: "202400XX",
+        escola: "Nome da Escola",
+        nivel: "Nível 3",
+        notas: {
+               fase1: { nota: 18.5, acertos: 20, posicao: "Classificado" },
+            fase2: { nota: 42.0, acertos: 6, posicao: "Aguardando" },
+            simulados: { nota: 85.0, media_turma: 72.5 },
+            treinamentos: { nota: 90.0, participacao: "100%" }
+        },
+        premiacoes: ["Medalha de ouro 2026"]
     }
 ];
 
@@ -70,7 +85,7 @@ function buscarNotas() {
 function exibirResultados(aluno) {
     const resultadoHTML = `
         <div class="aluno-info">
-            <h2>✅ FUNCIONANDO!</h2>
+            <h2>RESULTADOS</h2>
             <h3>${aluno.nome}</h3>
             <p>CPF: ${aluno.cpf}</p>
             <p>Escola: ${aluno.escola}</p>
