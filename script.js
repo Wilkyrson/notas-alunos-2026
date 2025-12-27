@@ -42,7 +42,20 @@ const bancoDeAlunos = [
             treinamentos: { nota: 92.0, participacao: "98%" }
         },
         premiacoes: ["Medalha de Prata 2025", "Menção Honrosa 2024"]
-    }
+    },
+      {
+        nome: "VITOR KAUE SANGEL DE SOUZA",
+        cpf: "022.953.912-47",
+        matricula: "20240003",
+        escola: "Escola Conexão Aquarela",
+        nivel: "Nível 3 (Ensino Médio)",
+        notas: {
+            fase1: { nota: 20.5, acertos: 21, posicao: "Classificado" },
+            fase2: { nota: 45.0, acertos: 7, posicao: "Aguardando" },
+            simulados: { nota: 88.0, media_turma: 75.0 },
+            treinamentos: { nota: 92.0, participacao: "98%" }
+        },
+        premiacoes: ["Medalha de Prata 2025", "Menção Honrosa 2024"]
     // Adicione mais alunos aqui...
 ];
 
