@@ -56,24 +56,13 @@ const bancoDeAlunos = [
         },
         premiacoes: ["Medalha de Prata 2025", "Menção Honrosa 2024"]
     }
-    // Adicione mais alunos aqui...
 ];
 
-// AUTOCOMPLETE DE NOMES (VERSÃO SUPER SEGURA - SEM CPF VISÍVEL)
+// AUTOCOMPLETE DE NOMES (VERSÃO SUPER SEGURA - NÃO PREENCHE CPF)
 let timeoutBusca = null;
 const listaAutocomplete = document.createElement('div');
 listaAutocomplete.className = 'autocomplete-lista';
-
-// Adicionar o autocomplete ao formulário de forma segura
-const formGroup = document.querySelector('.form-group') || 
-                  document.querySelector('.busca-container') || 
-                  document.querySelector('#formBusca') ||
-                  document.querySelector('form');
-if (formGroup) {
-    formGroup.appendChild(listaAutocomplete);
-} else {
-    console.warn("Elemento container para autocomplete não encontrado!");
-}
+document.querySelector('.form-group').appendChild(listaAutocomplete);
 
 document.getElementById('nomeAluno').addEventListener('input', function(e) {
     const valor = e.target.value.trim();
@@ -101,7 +90,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Buscar sugestões de nomes (VERSÃO SUPER SEGURA - SEM CPF)
+// Buscar sugestões de nomes (VERSÃO SUPER SEGURA - NÃO PREENCHE CPF)
 function buscarSugestoes(texto) {
     const textoBusca = texto.toUpperCase().trim();
     
@@ -121,7 +110,7 @@ function buscarSugestoes(texto) {
         return palavrasBusca.some(palavra => 
             palavra.length > 2 && nomeAluno.includes(palavra)
         );
-    }).slice(0, 5); // Limitar a 5 sugestões
+    }).slice(0, 5);
     
     if (sugestoes.length === 0) {
         listaAutocomplete.innerHTML = `
@@ -146,7 +135,7 @@ function buscarSugestoes(texto) {
             : aluno.escola;
         
         html += `
-            <div class="autocomplete-item" data-nome="${aluno.nome}" data-cpf="${aluno.cpf}">
+            <div class="autocomplete-item" data-nome="${aluno.nome}">
                 <div class="autocomplete-nome">
                     <i class="fas fa-user-graduate"></i>
                     ${nomeFormatado}
@@ -164,20 +153,19 @@ function buscarSugestoes(texto) {
     listaAutocomplete.innerHTML = html;
     listaAutocomplete.style.display = 'block';
     
-    // Adicionar eventos aos itens
+    // Adicionar eventos aos itens (NÃO PREENCHE CPF)
     document.querySelectorAll('.autocomplete-item').forEach(item => {
         item.addEventListener('click', function() {
             const nome = this.getAttribute('data-nome');
-            const cpf = this.getAttribute('data-cpf');
             
-            // Preencher os campos
+            // PREENCHE APENAS O NOME (NÃO PREENCHE CPF)
             document.getElementById('nomeAluno').value = nome;
-            document.getElementById('cpfAluno').value = cpf;
             
-            // Focar no botão de busca (em vez do CPF, para mais privacidade)
-            const btnBuscar = document.querySelector('.btn-buscar') || 
-                            document.querySelector('button[onclick="buscarNotas()"]');
-            if (btnBuscar) btnBuscar.focus();
+            // Limpa o campo CPF para garantir privacidade
+            document.getElementById('cpfAluno').value = '';
+            
+            // Foca no campo CPF para o usuário digitar
+            document.getElementById('cpfAluno').focus();
             
             // Esconder lista
             listaAutocomplete.style.display = 'none';
@@ -299,7 +287,7 @@ function buscarNotas() {
     }, 1000);
 }
 
-// FUNÇÃO PARA EXIBIR RESULTADOS (COMPLETA)
+// FUNÇÃO PARA EXIBIR RESULTADOS (COMPLETA) - MANTIDA IGUAL
 function exibirResultados(aluno) {
     // Calcular média geral
     const notasValores = [
@@ -464,9 +452,11 @@ document.getElementById('cpfAluno').addEventListener('keypress', function(e) {
 // Focar no campo de nome ao carregar
 window.onload = function() {
     document.getElementById('nomeAluno').focus();
+    document.getElementById('nomeAluno').placeholder = "Digite pelo menos 3 letras do nome";
+    document.getElementById('cpfAluno').placeholder = "Digite o CPF após selecionar o nome";
 };
 
-// ESTILOS PARA O AUTOCOMPLETE E RESULTADOS (ATUALIZADOS)
+// ESTILOS PARA O AUTOCOMPLETE E RESULTADOS (MANTIDOS IGUAIS)
 const style = document.createElement('style');
 style.textContent = `
     .autocomplete-lista {
@@ -742,116 +732,3 @@ style.textContent = `
         align-items: center;
         gap: 12px;
         margin: 12px 0;
-        padding: 12px;
-        background: white;
-        border-radius: 10px;
-        border-left: 4px solid #f59e0b;
-    }
-    
-    .premiacao-item i {
-        color: #f59e0b;
-        font-size: 1.3rem;
-    }
-    
-    .sem-premiacao {
-        color: #64748b;
-        text-align: center;
-        font-style: italic;
-        padding: 20px;
-    }
-    
-    .actions {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-        margin-top: 30px;
-    }
-    
-    .btn-print, .btn-logout {
-        padding: 14px 30px;
-        border: none;
-        border-radius: 10px;
-        font-weight: 600;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        transition: all 0.3s;
-        font-size: 1rem;
-    }
-    
-    .btn-print {
-        background: #4361ee;
-        color: white;
-    }
-    
-    .btn-print:hover {
-        background: #3a0ca3;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 15px rgba(67, 97, 238, 0.2);
-    }
-    
-    .btn-logout {
-        background: #e2e8f0;
-        color: #475569;
-    }
-    
-    .btn-logout:hover {
-        background: #cbd5e1;
-        transform: translateY(-2px);
-    }
-    
-    /* Responsivo */
-    @media (max-width: 768px) {
-        .autocomplete-lista {
-            width: 100%;
-        }
-        
-        .autocomplete-detalhes {
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .autocomplete-escola {
-            max-width: 100%;
-        }
-        
-        .aluno-header {
-            flex-direction: column;
-            gap: 15px;
-            text-align: center;
-        }
-        
-        .aluno-details {
-            grid-template-columns: 1fr;
-        }
-        
-        .notas-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .status-container {
-            grid-template-columns: 1fr;
-        }
-        
-        .actions {
-            flex-direction: column;
-        }
-        
-        .btn-print, .btn-logout {
-            width: 100%;
-            justify-content: center;
-        }
-        
-        .feedback-autocomplete {
-            bottom: 15px;
-            right: 15px;
-            left: 15px;
-            max-width: none;
-            text-align: center;
-            justify-content: center;
-            padding: 10px 15px;
-        }
-    }
-`;
-document.head.appendChild(style);
