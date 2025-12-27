@@ -15,7 +15,7 @@ const bancoDeAlunos = [
         premiacoes: ["Medalha de Ouro 2026"]
     },
     {
-        nome: "VITOR",  // ✅ MAIÚSCULAS
+        nome: "VITOR",
         cpf: "040.385.812-76",
         matricula: "20240099",
         escola: "Escola Conexão Aquarela",
@@ -28,7 +28,6 @@ const bancoDeAlunos = [
         },
         premiacoes: ["Medalha de Ouro 2026"]
     }
-    // ⬇️ AQUI ADICIONE MAIS ALUNOS
 ];
 
 // FORMATAÇÃO DE CPF
@@ -70,7 +69,7 @@ function buscarNotas() {
     setTimeout(() => {
         document.getElementById('loading').style.display = 'none';
         
-        // ✅ BUSCA NO BANCO DE DADOS
+        // Busca no banco de dados
         const aluno = bancoDeAlunos.find(a => 
             a.nome === nome && a.cpf === cpf
         );
@@ -156,17 +155,12 @@ function exibirResultados(aluno) {
     document.getElementById('resultado').style.display = 'block';
 }
 
-// FUNÇÕES AUXILIARES
+// FUNÇÃO DE ERRO SIMPLIFICADA
 function mostrarErro(mensagem) {
     document.getElementById('erro').innerHTML = `
         <i class="fas fa-exclamation-triangle"></i>
-        <h3>ALUNO NÃO ENCONTRADO</h3>
-        <p>${mensagem}</p>
-        <p><strong>Alunos cadastrados:</strong></p>
-        <ul>
-            <li>JOÃO PEDRO PANTOJA RABELO - CPF: 080.023.542-81</li>
-            <li>VITOR - CPF: 040.385.812-76</li>
-        </ul>
+        <h3>❌ Aluno não encontrado</h3>
+        <p>Verifique se o nome e CPF estão corretos.</p>
     `;
     document.getElementById('erro').style.display = 'block';
 }
