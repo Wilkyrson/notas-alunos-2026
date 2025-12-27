@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
-...
-<script src="script.js"></script>
+    <title>Consulta de Notas OBMEP - Sistema Seguro</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -14,12 +13,114 @@
             <div class="logo">
                 <i class="fas fa-shield-alt"></i>
                 <div>
-                    <h1>Sistema Acadêmico Seguro</h1>
+                    <h1>Sistema OBMEP 2024</h1>
                     <p class="subtitle">Acesso restrito por nome completo e CPF</p>
                 </div>
             </div>
             <div class="security-info">
                 <i class="fas fa-lock"></i>
-                <span>Dados protegidos por criptografia</span>
+                <span>Dados protegidos</span>
             </div>
         </header>
+
+        <main>
+            <div class="login-container">
+                <div class="login-header">
+                    <h2><i class="fas fa-user-check"></i> Autenticação do Aluno</h2>
+                    <p>Para sua segurança, informe ambos os dados</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomeAluno">
+                        <i class="fas fa-user-graduate"></i> Nome Completo
+                    </label>
+                    <input type="text" 
+                           id="nomeAluno" 
+                           placeholder="Digite seu nome completo"
+                           autocomplete="name">
+                </div>
+
+                <div class="form-group">
+                    <label for="cpfAluno">
+                        <i class="fas fa-id-card"></i> CPF
+                    </label>
+                    <div class="cpf-input">
+                        <input type="text" 
+                               id="cpfAluno" 
+                               placeholder="000.000.000-00"
+                               maxlength="14"
+                               autocomplete="off">
+                        <button class="info-btn" title="Formato: 000.000.000-00">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button id="buscarBtn" onclick="buscarNotas()" class="btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Acessar Resultados
+                    </button>
+                    <button onclick="limparFormulario()" class="btn-secondary">
+                        <i class="fas fa-eraser"></i> Limpar
+                    </button>
+                </div>
+
+                <div class="security-notice">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Seus dados são confidenciais. Não compartilhe com terceiros.</p>
+                </div>
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Verificando credenciais...</p>
+                <p class="loading-sub">Aguarde, estamos validando seus dados</p>
+            </div>
+
+            <div id="resultado" class="resultado" style="display: none;">
+                <!-- As notas serão exibidas aqui -->
+            </div>
+
+            <div id="erro" class="erro" style="display: none;">
+                <!-- Mensagens de erro serão exibidas aqui -->
+            </div>
+
+            <div class="instructions">
+                <h3><i class="fas fa-question-circle"></i> Instruções de Acesso</h3>
+                <ol>
+                    <li>Informe seu nome completo <strong>exatamente</strong> como está cadastrado</li>
+                    <li>Digite seu CPF com pontos e traço (formato: 000.000.000-00)</li>
+                    <li>Clique em "Acessar Resultados"</li>
+                    <li>Caso tenha problemas, entre em contato com o professor</li>
+                </ol>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4><i class="fas fa-shield-alt"></i> Segurança</h4>
+                    <p>LGPD Compliant</p>
+                    <p>Acesso restrito</p>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-clock"></i> Horário de Acesso</h4>
+                    <p>24 horas por dia</p>
+                    <p>7 dias por semana</p>
+                </div>
+                <div class="footer-section">
+                    <h4><i class="fas fa-phone-alt"></i> Suporte</h4>
+                    <p>professor@escola.edu.br</p>
+                    <p>Contate seu professor</p>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>© 2024 Sistema OBMEP - v2.0 | Todos os direitos reservados</p>
+                <p class="disclaimer">Este sistema é para uso exclusivo dos alunos participantes.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
