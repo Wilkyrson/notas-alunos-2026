@@ -1,6 +1,5 @@
-// BANCO DE DADOS DE ALUNOS COM MÚLTIPLOS NOMES SIMILARES
+// BANCO DE DADOS DE ALUNOS
 const bancoDeAlunos = [
-    // JOÃO 1
     {
         nome: "JOÃO PEDRO PANTOJA RABELO",
         cpf: "080.023.542-81",
@@ -15,40 +14,6 @@ const bancoDeAlunos = [
         },
         premiacoes: ["Medalha de Ouro 2026"]
     },
-    
-    // JOÃO 2
-    {
-        nome: "JOÃO CARLOS SILVA SANTOS",
-        cpf: "111.222.333-44",
-        matricula: "20240002",
-        escola: "Escola Conexão Aquarela",
-        nivel: "Nível 2 (8º-9º ano)",
-        notas: {
-            fase1: { nota: 15.0, acertos: 15, posicao: "Classificado" },
-            fase2: { nota: 35.0, acertos: 5, posicao: "Aguardando" },
-            simulados: { nota: 75.0, media_turma: 72.5 },
-            treinamentos: { nota: 85.0, participacao: "90%" }
-        },
-        premiacoes: ["Menção Honrosa 2025"]
-    },
-    
-    // JOÃO 3
-    {
-        nome: "JOÃO VITOR OLIVEIRA",
-        cpf: "222.333.444-55",
-        matricula: "20240003",
-        escola: "Colégio Estadual São Paulo",
-        nivel: "Nível 1 (6º-7º ano)",
-        notas: {
-            fase1: { nota: 12.0, acertos: 12, posicao: "Classificado" },
-            fase2: { nota: 28.0, acertos: 4, posicao: "Aguardando" },
-            simulados: { nota: 68.0, media_turma: 65.0 },
-            treinamentos: { nota: 78.0, participacao: "85%" }
-        },
-        premiacoes: []
-    },
-    
-    // RYAN 1
     {
         nome: "RYAN PETTERSON NUNES BORGES",
         cpf: "131.221.334-58",
@@ -63,70 +28,121 @@ const bancoDeAlunos = [
         },
         premiacoes: ["Medalha de Ouro 2026"]
     },
-    
-    // RYAN 2
+    // NOVO ALUNO: VICTOR DANIEL
     {
-        nome: "RYAN COSTA DE SOUSA",
-        cpf: "333.444.555-66",
-        matricula: "20240098",
-        escola: "Escola Municipal Professora Ana",
-        nivel: "Nível 2 (8º-9º ano)",
-        notas: {
-            fase1: { nota: 16.0, acertos: 16, posicao: "Classificado" },
-            fase2: { nota: 38.0, acertos: 5, posicao: "Aguardando" },
-            simulados: { nota: 80.0, media_turma: 72.5 },
-            treinamentos: { nota: 88.0, participacao: "95%" }
-        },
-        premiacoes: ["Medalha de Prata 2025"]
-    },
-    
-    // RYAN 3
-    {
-        nome: "RYAN GABRIEL MARTINS",
-        cpf: "444.555.666-77",
-        matricula: "20240097",
-        escola: "Instituto Federal de Educação",
+        nome: "VICTOR DANIEL SOUSA GOMES",
+        cpf: "057.098.292-85",
+        matricula: "20240003",
+        escola: "Instituto Federal do Amapá",
         nivel: "Nível 3 (Ensino Médio)",
         notas: {
-            fase1: { nota: 20.0, acertos: 20, posicao: "Classificado" },
+            fase1: { nota: 20.5, acertos: 21, posicao: "Classificado" },
             fase2: { nota: 45.0, acertos: 7, posicao: "Aguardando" },
-            simulados: { nota: 89.0, media_turma: 72.5 },
-            treinamentos: { nota: 94.0, participacao: "98%" }
+            simulados: { nota: 88.0, media_turma: 75.0 },
+            treinamentos: { nota: 92.0, participacao: "98%" }
         },
-        premiacoes: ["Medalha de Ouro 2025", "Menção Honrosa 2024"]
-    },
-    
-    // OUTROS ALUNOS PARA TESTE
-    {
-        nome: "MARIA EDUARDA LIMA",
-        cpf: "555.666.777-88",
-        matricula: "20240004",
-        escola: "Escola Conexão Aquarela",
-        nivel: "Nível 3 (Ensino Médio)",
-        notas: {
-            fase1: { nota: 22.0, acertos: 22, posicao: "Classificado" },
-            fase2: { nota: 48.0, acertos: 7, posicao: "Aguardando" },
-            simulados: { nota: 92.0, media_turma: 72.5 },
-            treinamentos: { nota: 96.0, participacao: "100%" }
-        },
-        premiacoes: ["Medalha de Ouro 2025", "Medalha de Prata 2024"]
-    },
-    
-    {
-        nome: "PEDRO HENRIQUE ALVES",
-        cpf: "666.777.888-99",
-        matricula: "20240005",
-        escola: "Colégio Militar",
-        nivel: "Nível 3 (Ensino Médio)",
-        notas: {
-            fase1: { nota: 19.0, acertos: 19, posicao: "Classificado" },
-            fase2: { nota: 41.0, acertos: 6, posicao: "Aguardando" },
-            simulados: { nota: 87.0, media_turma: 72.5 },
-            treinamentos: { nota: 91.0, participacao: "97%" }
-        },
-        premiacoes: ["Medalha de Bronze 2025"]
+        premiacoes: ["Medalha de Prata 2025", "Menção Honrosa 2024"]
     }
+    // Adicione mais alunos aqui...
 ];
+
+// AUTOCOMPLETE DE NOMES
+let timeoutBusca = null;
+const listaAutocomplete = document.createElement('div');
+listaAutocomplete.className = 'autocomplete-lista';
+document.querySelector('.form-group').appendChild(listaAutocomplete);
+
+document.getElementById('nomeAluno').addEventListener('input', function(e) {
+    const valor = e.target.value.trim();
+    
+    // Limpar timeout anterior
+    if (timeoutBusca) clearTimeout(timeoutBusca);
+    
+    // Limpar lista se campo vazio
+    if (!valor) {
+        listaAutocomplete.innerHTML = '';
+        listaAutocomplete.style.display = 'none';
+        return;
+    }
+    
+    // Aguardar um pouco antes de buscar (debounce)
+    timeoutBusca = setTimeout(() => {
+        buscarSugestoes(valor);
+    }, 300);
+});
+
+// Fechar autocomplete ao clicar fora
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.autocomplete-lista') && e.target.id !== 'nomeAluno') {
+        listaAutocomplete.style.display = 'none';
+    }
+});
+
+// Buscar sugestões de nomes
+function buscarSugestoes(texto) {
+    const textoBusca = texto.toUpperCase();
+    
+    // Filtrar alunos cujo nome contenha o texto
+    const sugestoes = bancoDeAlunos.filter(aluno => 
+        aluno.nome.includes(textoBusca)
+    ).slice(0, 5); // Limitar a 5 sugestões
+    
+    if (sugestoes.length === 0) {
+        listaAutocomplete.innerHTML = '';
+        listaAutocomplete.style.display = 'none';
+        return;
+    }
+    
+    // Gerar HTML das sugestões
+    let html = '';
+    sugestoes.forEach(aluno => {
+        // Destacar parte do nome que coincide
+        const nomeFormatado = destacarTexto(aluno.nome, textoBusca);
+        
+        html += `
+            <div class="autocomplete-item" data-nome="${aluno.nome}" data-cpf="${aluno.cpf}">
+                <div class="autocomplete-nome">${nomeFormatado}</div>
+                <div class="autocomplete-detalhes">
+                    <span class="autocomplete-cpf">${aluno.cpf}</span>
+                    <span class="autocomplete-escola">${aluno.escola}</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    listaAutocomplete.innerHTML = html;
+    listaAutocomplete.style.display = 'block';
+    
+    // Adicionar eventos aos itens
+    document.querySelectorAll('.autocomplete-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const nome = this.getAttribute('data-nome');
+            const cpf = this.getAttribute('data-cpf');
+            
+            // Preencher os campos
+            document.getElementById('nomeAluno').value = nome;
+            document.getElementById('cpfAluno').value = cpf;
+            document.getElementById('cpfAluno').focus();
+            
+            // Esconder lista
+            listaAutocomplete.style.display = 'none';
+        });
+    });
+}
+
+// Função para destacar texto correspondente
+function destacarTexto(nomeCompleto, textoBusca) {
+    const nome = nomeCompleto.toUpperCase();
+    const indice = nome.indexOf(textoBusca);
+    
+    if (indice === -1) return nomeCompleto;
+    
+    const antes = nomeCompleto.substring(0, indice);
+    const destaque = nomeCompleto.substring(indice, indice + textoBusca.length);
+    const depois = nomeCompleto.substring(indice + textoBusca.length);
+    
+    return `${antes}<strong>${destaque}</strong>${depois}`;
+}
 
 // FORMATAÇÃO DE CPF
 document.getElementById('cpfAluno').addEventListener('input', function(e) {
@@ -143,237 +159,189 @@ document.getElementById('cpfAluno').addEventListener('input', function(e) {
     }
     
     e.target.value = value;
+    
+    // Esconder autocomplete ao começar a digitar CPF
+    listaAutocomplete.style.display = 'none';
 });
 
-// FUNÇÃO PRINCIPAL DE BUSCA
+// FUNÇÃO PRINCIPAL DE BUSCA - SEGURA
 function buscarNotas() {
-    const nomeDigitado = document.getElementById('nomeAluno').value.trim();
+    const nomeDigitado = document.getElementById('nomeAluno').value.trim().toUpperCase();
     const cpfDigitado = document.getElementById('cpfAluno').value.trim();
     
-    // Esconder resultados anteriores
+    // Esconder resultados anteriores e autocomplete
     document.getElementById('resultado').style.display = 'none';
     document.getElementById('erro').style.display = 'none';
+    listaAutocomplete.style.display = 'none';
     
-    // Validação básica
+    // VALIDAÇÃO FORTE
     if (!nomeDigitado || !cpfDigitado) {
         mostrarErro('Por favor, preencha todos os campos.');
+        return;
+    }
+    
+    // Validar formato do CPF
+    const cpfLimpo = cpfDigitado.replace(/\D/g, '');
+    if (cpfLimpo.length !== 11) {
+        mostrarErro('CPF inválido. Digite os 11 números.');
         return;
     }
     
     // Mostrar loading
     document.getElementById('loading').style.display = 'block';
     
+    // Buscar aluno (SEGURO - CPF EXATO + NOME)
     setTimeout(() => {
         document.getElementById('loading').style.display = 'none';
         
-        // BUSCAR ALUNOS
-        const alunosEncontrados = encontrarAlunos(nomeDigitado, cpfDigitado);
-        
-        if (alunosEncontrados.length === 0) {
-            mostrarErro('Aluno não encontrado. Verifique nome e CPF.');
-        } else if (alunosEncontrados.length === 1) {
-            // APENAS UM ALUNO ENCONTRADO
-            exibirResultados(alunosEncontrados[0]);
-        } else {
-            // MÚLTIPLOS ALUNOS ENCONTRADOS
-            mostrarSelecaoAlunos(alunosEncontrados, nomeDigitado, cpfDigitado);
-        }
-    }, 800);
-}
-
-// FUNÇÃO PARA ENCONTRAR MÚLTIPLOS ALUNOS
-function encontrarAlunos(nomeDigitado, cpfDigitado) {
-    const nomeBusca = nomeDigitado.toUpperCase().trim();
-    const cpfBusca = cpfDigitado.replace(/\D/g, '');
-    
-    // Se CPF foi digitado completamente, buscar exato por CPF
-    if (cpfBusca.length === 11) {
-        const alunoPorCPF = bancoDeAlunos.find(aluno => 
-            aluno.cpf.replace(/\D/g, '') === cpfBusca
+        // Buscar aluno por CPF EXATO
+        const alunoEncontrado = bancoDeAlunos.find(aluno => 
+            aluno.cpf.replace(/\D/g, '') === cpfLimpo
         );
         
-        if (alunoPorCPF) {
-            return [alunoPorCPF];
+        if (!alunoEncontrado) {
+            mostrarErro('CPF não encontrado no sistema.');
+            return;
         }
-    }
-    
-    // Se CPF parcial foi digitado, buscar por CPF parcial também
-    const alunosPorCPFParcial = [];
-    if (cpfBusca.length >= 3) {
-        alunosPorCPFParcial.push(...bancoDeAlunos.filter(aluno => 
-            aluno.cpf.replace(/\D/g, '').includes(cpfBusca)
-        ));
-    }
-    
-    // Buscar por nome
-    const alunosPorNome = bancoDeAlunos.filter(aluno => {
-        const alunoNome = aluno.nome.toUpperCase();
         
-        // Busca exata ou parcial
-        if (alunoNome.includes(nomeBusca) || nomeBusca.includes(alunoNome)) return true;
-        
-        // Busca por palavras
-        const palavrasDigitadas = nomeBusca.split(' ').filter(p => p.length > 2);
-        const palavrasAluno = alunoNome.split(' ');
-        
-        if (palavrasDigitadas.length === 0) return false;
-        
-        let coincidencias = 0;
-        palavrasDigitadas.forEach(palavra => {
-            if (palavrasAluno.some(palavraAluno => palavraAluno.includes(palavra))) {
-                coincidencias++;
-            }
-        });
-        
-        return coincidencias >= Math.min(1, palavrasDigitadas.length);
-    });
-    
-    // Combinar resultados únicos
-    const todosAlunos = [...alunosPorCPFParcial, ...alunosPorNome];
-    const alunosUnicos = [];
-    const cpfVistos = new Set();
-    
-    todosAlunos.forEach(aluno => {
-        if (!cpfVistos.has(aluno.cpf)) {
-            cpfVistos.add(aluno.cpf);
-            alunosUnicos.push(aluno);
+        // Verificar se o nome corresponde (não precisa ser exato, mas similar)
+        const nomeAluno = alunoEncontrado.nome.toUpperCase();
+        if (!nomeAluno.includes(nomeDigitado) && !nomeDigitado.includes(nomeAluno)) {
+            mostrarErro('Nome não corresponde ao CPF informado.');
+            return;
         }
-    });
-    
-    return alunosUnicos;
+        
+        // Se passou todas as validações, mostrar resultados
+        exibirResultados(alunoEncontrado);
+        
+    }, 1000);
 }
 
-// FUNÇÃO PARA MOSTRAR SELEÇÃO DE MÚLTIPLOS ALUNOS
-function mostrarSelecaoAlunos(alunosEncontrados, nomeDigitado, cpfDigitado) {
-    const totalAlunos = alunosEncontrados.length;
+// FUNÇÃO PARA EXIBIR RESULTADOS (COMPLETA)
+function exibirResultados(aluno) {
+    // Calcular média geral
+    const notasValores = [
+        aluno.notas.fase1.nota,
+        aluno.notas.fase2.nota,
+        aluno.notas.simulados.nota,
+        aluno.notas.treinamentos.nota
+    ];
+    const mediaGeral = (notasValores.reduce((a, b) => a + b, 0) / notasValores.length).toFixed(1);
     
-    let listaHTML = `
-        <div class="selecao-container">
-            <div class="selecao-header">
-                <h3><i class="fas fa-search"></i> Encontramos ${totalAlunos} aluno${totalAlunos > 1 ? 's' : ''}</h3>
-                <p class="selecao-subtitle">
-                    Para: <strong>"${nomeDigitado}"</strong>
-                    ${cpfDigitado ? ` | CPF: ${cpfDigitado}` : ''}
-                </p>
+    // Determinar status
+    let status = "";
+    let statusClass = "";
+    
+    if (mediaGeral >= 80) {
+        status = "EXCELENTE";
+        statusClass = "aprovado";
+    } else if (mediaGeral >= 60) {
+        status = "BOM";
+        statusClass = "recuperacao";
+    } else {
+        status = "EM DESENVOLVIMENTO";
+        statusClass = "reprovado";
+    }
+    
+    const resultadoHTML = `
+        <div class="aluno-info">
+            <div class="aluno-header">
+                <h2><i class="fas fa-user-graduate"></i> ${aluno.nome}</h2>
+                <span class="aluno-nivel">${aluno.nivel}</span>
             </div>
             
-            <div class="selecao-alerta">
-                <i class="fas fa-info-circle"></i>
-                <p>Encontramos mais de um aluno. Selecione o correto:</p>
-            </div>
-            
-            <div class="lista-alunos">
-    `;
-    
-    alunosEncontrados.forEach((aluno, index) => {
-        // Determinar cor da medalha baseado nas premiações
-        let corMedalha = '#64748b'; // Cinza padrão
-        if (aluno.premiacoes.some(p => p.includes('Ouro'))) corMedalha = '#FFD700';
-        else if (aluno.premiacoes.some(p => p.includes('Prata'))) corMedalha = '#C0C0C0';
-        else if (aluno.premiacoes.some(p => p.includes('Bronze'))) corMedalha = '#CD7F32';
-        
-        listaHTML += `
-            <div class="aluno-opcao" onclick="selecionarAluno(${index})" data-cpf="${aluno.cpf}">
-                <div class="aluno-opcao-avatar">
-                    <div class="avatar-inicial">${aluno.nome.charAt(0)}</div>
-                    ${aluno.premiacoes.length > 0 ? 
-                        `<div class="avatar-medalha" style="background: ${corMedalha};">
-                            <i class="fas fa-medal"></i>
-                        </div>` 
-                        : ''
-                    }
+            <div class="aluno-details">
+                <div class="detail-item">
+                    <i class="fas fa-id-card"></i>
+                    <span><strong>CPF:</strong> ${aluno.cpf}</span>
                 </div>
-                
-                <div class="aluno-opcao-info">
-                    <h4>${aluno.nome}</h4>
-                    <div class="aluno-opcao-detalhes">
-                        <span class="detalhe-item">
-                            <i class="fas fa-id-card"></i>
-                            ${aluno.cpf}
-                        </span>
-                        <span class="detalhe-item">
-                            <i class="fas fa-school"></i>
-                            ${aluno.escola.length > 25 ? aluno.escola.substring(0, 25) + '...' : aluno.escola}
-                        </span>
-                        <span class="detalhe-item">
-                            <i class="fas fa-chart-bar"></i>
-                            ${aluno.nivel}
-                        </span>
-                    </div>
-                    <div class="aluno-opcao-premiacoes">
-                        ${aluno.premiacoes.length > 0 ? 
-                            `<span class="premio-badge">
-                                <i class="fas fa-trophy"></i>
-                                ${aluno.premiacoes.length} premiaç${aluno.premiacoes.length > 1 ? 'ões' : 'ão'}
-                            </span>` 
-                            : '<span class="sem-premio">Sem premiações</span>'
-                        }
-                    </div>
+                <div class="detail-item">
+                    <i class="fas fa-hashtag"></i>
+                    <span><strong>Matrícula:</strong> ${aluno.matricula}</span>
                 </div>
-                
-                <div class="aluno-opcao-selecionar">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </div>
-        `;
-    });
-    
-    listaHTML += `
-            </div>
-            
-            <div class="selecao-acoes">
-                <button class="btn-voltar" onclick="limparFormulario()">
-                    <i class="fas fa-arrow-left"></i> Nova Busca
-                </button>
-                <div class="selecao-dicas">
-                    <p><i class="fas fa-lightbulb"></i> <strong>Dicas para busca precisa:</strong></p>
-                    <ul>
-                        <li>Digite o nome COMPLETO do aluno</li>
-                        <li>Ou use o CPF completo (mais rápido)</li>
-                        <li>Clique no aluno correto para ver todos os detalhes</li>
-                    </ul>
+                <div class="detail-item">
+                    <i class="fas fa-school"></i>
+                    <span><strong>Escola:</strong> ${aluno.escola}</span>
                 </div>
             </div>
         </div>
+        
+        <div class="notas-grid">
+            <div class="nota-card">
+                <h3><i class="fas fa-flag"></i> FASE 1</h3>
+                <div class="nota-valor">${aluno.notas.fase1.nota}</div>
+                <div class="nota-detalhes">
+                    <p><i class="fas fa-check-circle"></i> ${aluno.notas.fase1.acertos} acertos</p>
+                    <p><i class="fas fa-chart-line"></i> ${aluno.notas.fase1.posicao}</p>
+                </div>
+            </div>
+            
+            <div class="nota-card">
+                <h3><i class="fas fa-flag-checkered"></i> FASE 2</h3>
+                <div class="nota-valor">${aluno.notas.fase2.nota}</div>
+                <div class="nota-detalhes">
+                    <p><i class="fas fa-check-circle"></i> ${aluno.notas.fase2.acertos} problemas</p>
+                    <p><i class="fas fa-hourglass-half"></i> ${aluno.notas.fase2.posicao}</p>
+                </div>
+            </div>
+            
+            <div class="nota-card">
+                <h3><i class="fas fa-clipboard-check"></i> SIMULADOS</h3>
+                <div class="nota-valor">${aluno.notas.simulados.nota}%</div>
+                <div class="nota-detalhes">
+                    <p><i class="fas fa-chart-line"></i> Média: ${aluno.notas.simulados.media_turma}%</p>
+                    <p><i class="fas fa-ranking-star"></i> ${aluno.notas.simulados.nota > aluno.notas.simulados.media_turma ? 'Acima da média' : 'Na média'}</p>
+                </div>
+            </div>
+            
+            <div class="nota-card">
+                <h3><i class="fas fa-dumbbell"></i> TREINAMENTOS</h3>
+                <div class="nota-valor">${aluno.notas.treinamentos.nota}%</div>
+                <div class="nota-detalhes">
+                    <p><i class="fas fa-calendar-check"></i> ${aluno.notas.treinamentos.participacao}</p>
+                    <p><i class="fas fa-fire"></i> ${aluno.notas.treinamentos.nota >= 90 ? 'Alta dedicação' : 'Boa dedicação'}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-container">
+            <div class="media-geral">
+                <h3><i class="fas fa-chart-bar"></i> DESEMPENHO GERAL</h3>
+                <div class="media-valor">${mediaGeral}%</div>
+                <div class="status ${statusClass}">${status}</div>
+            </div>
+            
+            <div class="premiacoes-box">
+                <h3><i class="fas fa-trophy"></i> PREMIAÇÕES</h3>
+                <div class="premiacoes-lista">
+                    ${aluno.premiacoes.length > 0 
+                        ? aluno.premiacoes.map(premio => `
+                            <div class="premiacao-item">
+                                <i class="fas fa-medal"></i>
+                                <span>${premio}</span>
+                            </div>
+                        `).join('')
+                        : '<p class="sem-premiacao">Sem premiações anteriores</p>'
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn-print" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimir Relatório
+            </button>
+            <button class="btn-logout" onclick="limparFormulario()">
+                <i class="fas fa-redo"></i> Nova Consulta
+            </button>
+        </div>
     `;
     
-    // Armazenar alunos encontrados globalmente para seleção
-    window.alunosParaSelecao = alunosEncontrados;
-    
-    document.getElementById('resultado').innerHTML = listaHTML;
+    document.getElementById('resultado').innerHTML = resultadoHTML;
     document.getElementById('resultado').style.display = 'block';
     
-    // Adicionar animação de entrada
-    setTimeout(() => {
-        const opcoes = document.querySelectorAll('.aluno-opcao');
-        opcoes.forEach((opcao, i) => {
-            setTimeout(() => {
-                opcao.style.opacity = '1';
-                opcao.style.transform = 'translateY(0)';
-            }, i * 100);
-        });
-    }, 100);
-}
-
-// FUNÇÃO PARA SELECIONAR UM ALUNO DA LISTA
-function selecionarAluno(indice) {
-    const alunoSelecionado = window.alunosParaSelecao[indice];
-    
-    // Efeito visual de seleção
-    const opcaoSelecionada = document.querySelectorAll('.aluno-opcao')[indice];
-    opcaoSelecionada.style.background = '#4361ee15';
-    opcaoSelecionada.style.borderColor = '#4361ee';
-    
-    // Pequeno delay para mostrar o feedback visual
-    setTimeout(() => {
-        exibirResultados(alunoSelecionado);
-    }, 300);
-}
-
-// FUNÇÃO EXIBIR RESULTADOS (completa - mantém o código anterior)
-function exibirResultados(aluno) {
-    // ... (INSIRA AQUI TODO O CÓDIGO DA FUNÇÃO exibirResultados que já temos)
-    // MANTENHA TODO O CÓDIGO DA VERSÃO ANTERIOR
+    // Rolar suavemente até os resultados
+    document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
 }
 
 // FUNÇÃO DE ERRO
@@ -382,7 +350,7 @@ function mostrarErro(mensagem) {
         <div class="erro-content">
             <i class="fas fa-exclamation-triangle"></i>
             <h3>${mensagem}</h3>
-            <p class="erro-dica">Dica: Digite pelo menos o primeiro nome completo e CPF</p>
+            <p class="erro-dica">Verifique se os dados estão corretos.</p>
         </div>
     `;
     document.getElementById('erro').style.display = 'block';
@@ -393,12 +361,14 @@ function limparFormulario() {
     document.getElementById('cpfAluno').value = '';
     document.getElementById('resultado').style.display = 'none';
     document.getElementById('erro').style.display = 'none';
+    listaAutocomplete.style.display = 'none';
     document.getElementById('nomeAluno').focus();
 }
 
 // PERMITIR ENTER PARA BUSCAR
 document.getElementById('nomeAluno').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
+        e.preventDefault();
         document.getElementById('cpfAluno').focus();
     }
 });
@@ -414,295 +384,325 @@ window.onload = function() {
     document.getElementById('nomeAluno').focus();
 };
 
-// ESTILOS EXTRAS COMPLETOS
+// ESTILOS PARA O AUTOCOMPLETE E RESULTADOS
 const style = document.createElement('style');
 style.textContent = `
-    /* ESTILOS DA SELEÇÃO DE ALUNOS */
-    .selecao-container {
+    .autocomplete-lista {
+        position: absolute;
         background: white;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        max-width: 800px;
-        margin: 0 auto;
+        border: 2px solid #4361ee;
+        border-radius: 10px;
+        width: calc(100% - 45px);
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        margin-top: 5px;
+        display: none;
     }
     
-    .selecao-header {
-        text-align: center;
-        margin-bottom: 25px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #f1f5f9;
+    .autocomplete-item {
+        padding: 12px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #e2e8f0;
+        transition: all 0.2s;
     }
     
-    .selecao-header h3 {
+    .autocomplete-item:hover {
+        background: #f1f5f9;
+    }
+    
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+    
+    .autocomplete-nome {
+        font-weight: 600;
         color: #1a1a2e;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-    
-    .selecao-subtitle {
-        color: #64748b;
+        margin-bottom: 5px;
         font-size: 1rem;
     }
     
-    .selecao-alerta {
-        background: #e8f4fc;
-        padding: 15px 20px;
-        border-radius: 10px;
-        margin-bottom: 25px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        border-left: 4px solid #4361ee;
-    }
-    
-    .selecao-alerta i {
+    .autocomplete-nome strong {
         color: #4361ee;
-        font-size: 1.5rem;
+        font-weight: 700;
     }
     
-    .selecao-alerta p {
-        color: #1a1a2e;
-        margin: 0;
-        font-weight: 500;
-    }
-    
-    .lista-alunos {
-        margin: 25px 0;
-    }
-    
-    .aluno-opcao {
+    .autocomplete-detalhes {
         display: flex;
-        align-items: center;
-        gap: 20px;
-        padding: 20px;
-        margin: 15px 0;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+    
+    .autocomplete-cpf {
         background: #f8fafc;
-        border-radius: 12px;
-        border: 2px solid #e2e8f0;
-        cursor: pointer;
-        transition: all 0.3s;
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-family: monospace;
     }
     
-    .aluno-opcao:hover {
-        background: #f1f5f9;
-        border-color: #4361ee;
-        transform: translateY(-2px) translateX(5px);
-        box-shadow: 0 10px 20px rgba(67, 97, 238, 0.1);
-    }
-    
-    .aluno-opcao-avatar {
-        position: relative;
-        flex-shrink: 0;
-    }
-    
-    .avatar-inicial {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #4361ee, #3a0ca3);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-    }
-    
-    .avatar-medalha {
-        position: absolute;
-        bottom: -5px;
-        right: -5px;
-        width: 25px;
-        height: 25px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 0.8rem;
-        border: 2px solid white;
-    }
-    
-    .aluno-opcao-info {
-        flex: 1;
-        min-width: 0; /* Para evitar overflow */
-    }
-    
-    .aluno-opcao-info h4 {
-        color: #1a1a2e;
-        margin-bottom: 10px;
-        font-size: 1.1rem;
+    .autocomplete-escola {
+        max-width: 60%;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
     
-    .aluno-opcao-detalhes {
+    /* Estilos para resultados */
+    .aluno-header {
         display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-        margin-bottom: 10px;
-    }
-    
-    .detalhe-item {
-        display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 8px;
-        color: #64748b;
-        font-size: 0.85rem;
-        background: white;
-        padding: 5px 12px;
-        border-radius: 20px;
-        border: 1px solid #e2e8f0;
-    }
-    
-    .detalhe-item i {
-        color: #4361ee;
-        font-size: 0.8rem;
-    }
-    
-    .aluno-opcao-premiacoes {
-        margin-top: 8px;
-    }
-    
-    .premio-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: linear-gradient(135deg, #f59e0b15, #d9770615);
-        color: #d97706;
-        padding: 5px 15px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        border: 1px solid #f59e0b30;
-    }
-    
-    .sem-premio {
-        color: #94a3b8;
-        font-size: 0.85rem;
-        font-style: italic;
-    }
-    
-    .aluno-opcao-selecionar {
-        color: #4361ee;
-        font-size: 1.5rem;
-        opacity: 0.7;
-        transition: all 0.3s;
-    }
-    
-    .aluno-opcao:hover .aluno-opcao-selecionar {
-        opacity: 1;
-        transform: translateX(5px);
-    }
-    
-    .selecao-acoes {
-        margin-top: 30px;
-        padding-top: 25px;
-        border-top: 2px solid #e2e8f0;
-    }
-    
-    .btn-voltar {
-        background: #e2e8f0;
-        color: #475569;
-        border: none;
-        padding: 12px 25px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        transition: all 0.3s;
         margin-bottom: 20px;
     }
     
-    .btn-voltar:hover {
+    .aluno-nivel {
+        background: linear-gradient(135deg, #4361ee, #3a0ca3);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .aluno-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 12px;
+    }
+    
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #475569;
+    }
+    
+    .detail-item i {
+        color: #4361ee;
+        font-size: 1.1rem;
+    }
+    
+    .notas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin: 25px 0;
+    }
+    
+    .nota-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    .nota-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(67, 97, 238, 0.1);
+        border-color: #4361ee;
+    }
+    
+    .nota-card h3 {
+        color: #1a1a2e;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 1rem;
+    }
+    
+    .nota-valor {
+        font-size: 2.8rem;
+        font-weight: bold;
+        margin: 15px 0;
+        background: linear-gradient(135deg, #4361ee, #3a0ca3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .nota-detalhes {
+        margin-top: 15px;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+    
+    .nota-detalhes p {
+        margin: 8px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .status-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin: 30px 0;
+    }
+    
+    .media-geral, .premiacoes-box {
+        background: #f8fafc;
+        padding: 25px;
+        border-radius: 15px;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .media-geral {
+        text-align: center;
+    }
+    
+    .media-valor {
+        font-size: 3.5rem;
+        font-weight: bold;
+        margin: 15px 0;
+        background: linear-gradient(135deg, #10b981, #059669);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .status {
+        display: inline-block;
+        padding: 10px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-top: 15px;
+    }
+    
+    .aprovado {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+    
+    .recuperacao {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+    }
+    
+    .reprovado {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+    }
+    
+    .premiacoes-lista {
+        margin-top: 15px;
+    }
+    
+    .premiacao-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 12px 0;
+        padding: 12px;
+        background: white;
+        border-radius: 10px;
+        border-left: 4px solid #f59e0b;
+    }
+    
+    .premiacao-item i {
+        color: #f59e0b;
+        font-size: 1.3rem;
+    }
+    
+    .sem-premiacao {
+        color: #64748b;
+        text-align: center;
+        font-style: italic;
+        padding: 20px;
+    }
+    
+    .actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .btn-print, .btn-logout {
+        padding: 14px 30px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s;
+        font-size: 1rem;
+    }
+    
+    .btn-print {
+        background: #4361ee;
+        color: white;
+    }
+    
+    .btn-print:hover {
+        background: #3a0ca3;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(67, 97, 238, 0.2);
+    }
+    
+    .btn-logout {
+        background: #e2e8f0;
+        color: #475569;
+    }
+    
+    .btn-logout:hover {
         background: #cbd5e1;
         transform: translateY(-2px);
     }
     
-    .selecao-dicas {
-        background: #f8fafc;
-        padding: 20px;
-        border-radius: 10px;
-        border-left: 4px solid #10b981;
-    }
-    
-    .selecao-dicas p {
-        color: #1a1a2e;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 600;
-    }
-    
-    .selecao-dicas ul {
-        margin: 0;
-        padding-left: 25px;
-        color: #64748b;
-    }
-    
-    .selecao-dicas li {
-        margin-bottom: 8px;
-        line-height: 1.5;
-    }
-    
-    .selecao-dicas i {
-        color: #10b981;
-    }
-    
     /* Responsivo */
     @media (max-width: 768px) {
-        .selecao-container {
-            padding: 20px;
+        .autocomplete-lista {
+            width: 100%;
         }
         
-        .aluno-opcao {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 15px;
-            text-align: center;
-        }
-        
-        .aluno-opcao-detalhes {
-            flex-direction: column;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .detalhe-item {
-            justify-content: center;
-        }
-        
-        .aluno-opcao-selecionar {
-            align-self: center;
-            margin-top: 10px;
-        }
-        
-        .selecao-dicas ul {
-            padding-left: 20px;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .selecao-header h3 {
+        .autocomplete-detalhes {
             flex-direction: column;
             gap: 5px;
         }
         
-        .selecao-alerta {
+        .autocomplete-escola {
+            max-width: 100%;
+        }
+        
+        .aluno-header {
             flex-direction: column;
+            gap: 15px;
             text-align: center;
-            gap: 10px;
+        }
+        
+        .aluno-details {
+            grid-template-columns: 1fr;
+        }
+        
+        .notas-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .status-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .actions {
+            flex-direction: column;
+        }
+        
+        .btn-print, .btn-logout {
+            width: 100%;
+            justify-content: center;
         }
     }
 `;
