@@ -1,7 +1,7 @@
 // BANCO DE DADOS DE ALUNOS
 const bancoDeAlunos = [
     {
-        nome: "JOÃO PEDRO PANTOJA RABELO",
+        nome: "João Pedro Pantoja Rabelo",
         cpf: "080.023.542-81",
         matricula: "20240001",
         escola: "Escola Conexão Aquarela",
