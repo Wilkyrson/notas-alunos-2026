@@ -28,7 +28,6 @@ const bancoDeAlunos = [
         },
         premiacoes: ["Medalha de Ouro 2026"]
     },
-    // NOVO ALUNO: VICTOR DANIEL
     {
         nome: "VICTOR DANIEL SOUSA GOMES",
         cpf: "057.098.292-85",
@@ -43,10 +42,10 @@ const bancoDeAlunos = [
         },
         premiacoes: ["Medalha de Prata 2025", "Menção Honrosa 2024"]
     },
-      {
+    {
         nome: "VITOR KAUE SANGEL DE SOUZA",
         cpf: "022.953.912-47",
-        matricula: "20240003",
+        matricula: "20240004",  // Mudei para matrícula única
         escola: "Escola Conexão Aquarela",
         nivel: "Nível 3 (Ensino Médio)",
         notas: {
@@ -56,9 +55,9 @@ const bancoDeAlunos = [
             treinamentos: { nota: 92.0, participacao: "98%" }
         },
         premiacoes: ["Medalha de Prata 2025", "Menção Honrosa 2024"]
-        }
+    }  // ← ESTA CHAVE FECHA O OBJETO DO VITOR KAUE
     // Adicione mais alunos aqui...
-];
+];  // ← ESTA CHAVE FECHA O ARRAY COMPLETO
 
 // AUTOCOMPLETE DE NOMES
 let timeoutBusca = null;
