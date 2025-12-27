@@ -58,12 +58,44 @@ const bancoDeAlunos = [
     }
 ];
 
-// AUTOCOMPLETE DE NOMES (VERSÃO SUPER SEGURA - NÃO PREENCHE CPF)
+// ========== AUTOCOMPLETE DE NOMES ==========
 let timeoutBusca = null;
 const listaAutocomplete = document.createElement('div');
 listaAutocomplete.className = 'autocomplete-lista';
-document.querySelector('.form-group').appendChild(listaAutocomplete);
 
+// ENCONTRAR O CONTAINER CORRETAMENTE
+function encontrarContainerAutocomplete() {
+    // Verifica se o elemento .form-group existe
+    const formGroup = document.querySelector('.form-group');
+    if (formGroup) {
+        // Verifica se é o primeiro form-group (onde está o campo nome)
+        const nomeInput = document.getElementById('nomeAluno');
+        if (nomeInput && nomeInput.parentElement === formGroup) {
+            return formGroup;
+        }
+    }
+    
+    // Se não encontrou, tenta o container pai do campo nome
+    const nomeInput = document.getElementById('nomeAluno');
+    if (nomeInput && nomeInput.parentElement) {
+        return nomeInput.parentElement;
+    }
+    
+    // Último recurso: usa o body
+    return document.body;
+}
+
+// INICIALIZAR AUTOCOMPLETE
+const containerAutocomplete = encontrarContainerAutocomplete();
+if (containerAutocomplete) {
+    containerAutocomplete.style.position = 'relative';
+    containerAutocomplete.appendChild(listaAutocomplete);
+    console.log("✅ Autocomplete adicionado ao container:", containerAutocomplete.className);
+} else {
+    console.error("❌ Não foi possível encontrar o container para o autocomplete");
+}
+
+// EVENTO DE INPUT NO CAMPO NOME
 document.getElementById('nomeAluno').addEventListener('input', function(e) {
     const valor = e.target.value.trim();
     
@@ -83,34 +115,36 @@ document.getElementById('nomeAluno').addEventListener('input', function(e) {
     }, 300);
 });
 
-// Fechar autocomplete ao clicar fora
+// FECHAR AUTOCOMPLETE AO CLICAR FORA
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.autocomplete-lista') && e.target.id !== 'nomeAluno') {
         listaAutocomplete.style.display = 'none';
     }
 });
 
-// Buscar sugestões de nomes (VERSÃO SUPER SEGURA - NÃO PREENCHE CPF)
+// BUSCAR SUGESTÕES DE NOMES (FUNCIONANDO)
 function buscarSugestoes(texto) {
     const textoBusca = texto.toUpperCase().trim();
     
-    // Apenas buscar se tiver pelo menos 3 caracteres (segurança + performance)
+    console.log(`🔍 Buscando sugestões para: "${texto}" (${textoBusca})`);
+    
+    // Apenas buscar se tiver pelo menos 3 caracteres
     if (textoBusca.length < 3) {
         listaAutocomplete.innerHTML = '';
         listaAutocomplete.style.display = 'none';
+        console.log("❌ Busca cancelada: menos de 3 caracteres");
         return;
     }
     
-    // Filtrar alunos - busca mais inteligente (por palavras)
+    // Filtrar alunos cujo nome contenha o texto
     const sugestoes = bancoDeAlunos.filter(aluno => {
         const nomeAluno = aluno.nome.toUpperCase();
-        
-        // Busca por palavras individuais (mais precisa)
-        const palavrasBusca = textoBusca.split(' ');
-        return palavrasBusca.some(palavra => 
-            palavra.length > 2 && nomeAluno.includes(palavra)
-        );
-    }).slice(0, 5);
+        const resultado = nomeAluno.includes(textoBusca);
+        console.log(`  - ${aluno.nome}: ${resultado ? '✅' : '❌'}`);
+        return resultado;
+    }).slice(0, 5); // Limitar a 5 sugestões
+    
+    console.log(`✅ Encontrados ${sugestoes.length} alunos`);
     
     if (sugestoes.length === 0) {
         listaAutocomplete.innerHTML = `
@@ -123,13 +157,13 @@ function buscarSugestoes(texto) {
         return;
     }
     
-    // Gerar HTML das sugestões (SEM CPF - versão privada)
+    // Gerar HTML das sugestões
     let html = '';
     sugestoes.forEach(aluno => {
         // Destacar parte do nome que coincide
         const nomeFormatado = destacarTexto(aluno.nome, textoBusca);
         
-        // Abreviar escola se for muito longa (mais privacidade)
+        // Abreviar escola se for muito longa
         const escolaAbreviada = aluno.escola.length > 35 
             ? aluno.escola.substring(0, 32) + '...' 
             : aluno.escola;
@@ -153,44 +187,46 @@ function buscarSugestoes(texto) {
     listaAutocomplete.innerHTML = html;
     listaAutocomplete.style.display = 'block';
     
-    // Adicionar eventos aos itens (NÃO PREENCHE CPF)
+    // Adicionar eventos aos itens (APENAS PREENCHE O NOME)
     document.querySelectorAll('.autocomplete-item').forEach(item => {
         item.addEventListener('click', function() {
             const nome = this.getAttribute('data-nome');
+            console.log(`✅ Clicou no aluno: ${nome}`);
             
             // PREENCHE APENAS O NOME (NÃO PREENCHE CPF)
             document.getElementById('nomeAluno').value = nome;
             
-            // Limpa o campo CPF para garantir privacidade
+            // Limpa o campo CPF (caso tenha algo)
             document.getElementById('cpfAluno').value = '';
             
-            // Foca no campo CPF para o usuário digitar
+            // Foca no campo CPF
             document.getElementById('cpfAluno').focus();
             
             // Esconder lista
             listaAutocomplete.style.display = 'none';
             
-            // Mensagem sutil de confirmação
-            mostrarFeedback('Aluno selecionado. Agora digite o CPF para confirmar.');
+            // Mensagem de confirmação
+            mostrarFeedback('Aluno selecionado. Digite o CPF para continuar.');
         });
     });
 }
 
-// Função para destacar texto correspondente
+// FUNÇÃO PARA DESTACAR TEXTO CORRESPONDENTE
 function destacarTexto(nomeCompleto, textoBusca) {
     const nome = nomeCompleto.toUpperCase();
-    const indice = nome.indexOf(textoBusca);
+    const texto = textoBusca.toUpperCase();
+    const indice = nome.indexOf(texto);
     
     if (indice === -1) return nomeCompleto;
     
     const antes = nomeCompleto.substring(0, indice);
-    const destaque = nomeCompleto.substring(indice, indice + textoBusca.length);
-    const depois = nomeCompleto.substring(indice + textoBusca.length);
+    const destaque = nomeCompleto.substring(indice, indice + texto.length);
+    const depois = nomeCompleto.substring(indice + texto.length);
     
     return `${antes}<strong>${destaque}</strong>${depois}`;
 }
 
-// Função de feedback sutil
+// FUNÇÃO DE FEEDBACK SUTIL
 function mostrarFeedback(mensagem) {
     // Remover feedback anterior se existir
     const feedbackAnterior = document.querySelector('.feedback-autocomplete');
@@ -214,7 +250,7 @@ function mostrarFeedback(mensagem) {
     }, 3000);
 }
 
-// FORMATAÇÃO DE CPF
+// ========== FORMATAÇÃO DE CPF ==========
 document.getElementById('cpfAluno').addEventListener('input', function(e) {
     let value = e.target.value.replace(/\D/g, '');
     
@@ -234,7 +270,7 @@ document.getElementById('cpfAluno').addEventListener('input', function(e) {
     listaAutocomplete.style.display = 'none';
 });
 
-// FUNÇÃO PRINCIPAL DE BUSCA - SEGURA
+// ========== FUNÇÃO PRINCIPAL DE BUSCA ==========
 function buscarNotas() {
     const nomeDigitado = document.getElementById('nomeAluno').value.trim().toUpperCase();
     const cpfDigitado = document.getElementById('cpfAluno').value.trim();
@@ -274,7 +310,7 @@ function buscarNotas() {
             return;
         }
         
-        // Verificar se o nome corresponde (não precisa ser exato, mas similar)
+        // Verificar se o nome corresponde
         const nomeAluno = alunoEncontrado.nome.toUpperCase();
         if (!nomeAluno.includes(nomeDigitado) && !nomeDigitado.includes(nomeAluno)) {
             mostrarErro('Nome não corresponde ao CPF informado.');
@@ -287,7 +323,7 @@ function buscarNotas() {
     }, 1000);
 }
 
-// FUNÇÃO PARA EXIBIR RESULTADOS (COMPLETA) - MANTIDA IGUAL
+// ========== FUNÇÃO PARA EXIBIR RESULTADOS ==========
 function exibirResultados(aluno) {
     // Calcular média geral
     const notasValores = [
@@ -414,7 +450,7 @@ function exibirResultados(aluno) {
     document.getElementById('resultado').scrollIntoView({ behavior: 'smooth' });
 }
 
-// FUNÇÃO DE ERRO
+// ========== FUNÇÃO DE ERRO ==========
 function mostrarErro(mensagem) {
     document.getElementById('erro').innerHTML = `
         <div class="erro-content">
@@ -426,6 +462,7 @@ function mostrarErro(mensagem) {
     document.getElementById('erro').style.display = 'block';
 }
 
+// ========== FUNÇÃO LIMPAR FORMULÁRIO ==========
 function limparFormulario() {
     document.getElementById('nomeAluno').value = '';
     document.getElementById('cpfAluno').value = '';
@@ -435,7 +472,7 @@ function limparFormulario() {
     document.getElementById('nomeAluno').focus();
 }
 
-// PERMITIR ENTER PARA BUSCAR
+// ========== PERMITIR ENTER PARA BUSCAR ==========
 document.getElementById('nomeAluno').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') {
         e.preventDefault();
@@ -449,14 +486,15 @@ document.getElementById('cpfAluno').addEventListener('keypress', function(e) {
     }
 });
 
-// Focar no campo de nome ao carregar
+// ========== FOCAR NO CAMPO DE NOME AO CARREGAR ==========
 window.onload = function() {
     document.getElementById('nomeAluno').focus();
-    document.getElementById('nomeAluno').placeholder = "Digite pelo menos 3 letras do nome";
-    document.getElementById('cpfAluno').placeholder = "Digite o CPF após selecionar o nome";
+    console.log("🚀 Sistema de Consulta de Notas carregado!");
+    console.log("📝 Banco de dados com", bancoDeAlunos.length, "alunos");
+    console.log("💡 Digite 'JOÃO' ou 'VICTOR' para testar o autocomplete");
 };
 
-// ESTILOS PARA O AUTOCOMPLETE E RESULTADOS (MANTIDOS IGUAIS)
+// ========== ESTILOS PARA O AUTOCOMPLETE E RESULTADOS ==========
 const style = document.createElement('style');
 style.textContent = `
     .autocomplete-lista {
@@ -464,13 +502,15 @@ style.textContent = `
         background: white;
         border: 2px solid #4361ee;
         border-radius: 10px;
-        width: calc(100% - 45px);
+        width: 100%;
         max-height: 300px;
         overflow-y: auto;
         z-index: 1000;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         margin-top: 5px;
         display: none;
+        top: 100%;
+        left: 0;
     }
     
     .autocomplete-item {
@@ -732,3 +772,116 @@ style.textContent = `
         align-items: center;
         gap: 12px;
         margin: 12px 0;
+        padding: 12px;
+        background: white;
+        border-radius: 10px;
+        border-left: 4px solid #f59e0b;
+    }
+    
+    .premiacao-item i {
+        color: #f59e0b;
+        font-size: 1.3rem;
+    }
+    
+    .sem-premiacao {
+        color: #64748b;
+        text-align: center;
+        font-style: italic;
+        padding: 20px;
+    }
+    
+    .actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+    
+    .btn-print, .btn-logout {
+        padding: 14px 30px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s;
+        font-size: 1rem;
+    }
+    
+    .btn-print {
+        background: #4361ee;
+        color: white;
+    }
+    
+    .btn-print:hover {
+        background: #3a0ca3;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(67, 97, 238, 0.2);
+    }
+    
+    .btn-logout {
+        background: #e2e8f0;
+        color: #475569;
+    }
+    
+    .btn-logout:hover {
+        background: #cbd5e1;
+        transform: translateY(-2px);
+    }
+    
+    /* Responsivo */
+    @media (max-width: 768px) {
+        .autocomplete-lista {
+            width: 100%;
+        }
+        
+        .autocomplete-detalhes {
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .autocomplete-escola {
+            max-width: 100%;
+        }
+        
+        .aluno-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .aluno-details {
+            grid-template-columns: 1fr;
+        }
+        
+        .notas-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .status-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .actions {
+            flex-direction: column;
+        }
+        
+        .btn-print, .btn-logout {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .feedback-autocomplete {
+            bottom: 15px;
+            right: 15px;
+            left: 15px;
+            max-width: none;
+            text-align: center;
+            justify-content: center;
+            padding: 10px 15px;
+        }
+    }
+`;
+document.head.appendChild(style);
