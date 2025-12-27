@@ -56,6 +56,7 @@ const bancoDeAlunos = [
             treinamentos: { nota: 92.0, participacao: "98%" }
         },
         premiacoes: ["Medalha de Prata 2025", "Menção Honrosa 2024"]
+        },
     // Adicione mais alunos aqui...
 ];
 
