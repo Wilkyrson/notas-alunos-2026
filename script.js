@@ -15,10 +15,10 @@ const bancoDeAlunos = [
         premiacoes: ["Medalha de Ouro 2026"]
     },
     {
-        nome: "VITOR",
-        cpf: "040.385.812-76",
+        nome: "Ryan Petterson Nunes Borges",
+        cpf: "131.221.334-58",
         matricula: "20240099",
-        escola: "Escola Conexão Aquarela",
+        escola: "Escola Estadual Rivanda Nazare Da Silva Guimaraes",
         nivel: "Nível 3 (Ensino Médio)",
         notas: {
             fase1: { nota: 18.5, acertos: 20, posicao: "Classificado" },
