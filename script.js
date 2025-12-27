@@ -16,10 +16,10 @@ const bancoDeAlunos = [
        },  // ← VÍRGULA do aluno anterior
     
     {   // ← Início do NOVO aluno
-        nome: "",
-        cpf: "CPF.AQUI-00",
-        matricula: "202400XX",
-        escola: "Nome da Escola",
+        nome: "Vitor",
+        cpf: "040.385.812-76",
+        matricula: "20240099",
+        escola: "Escola Conexão Aquarela",
         nivel: "Nível 3",
         notas: {
                fase1: { nota: 18.5, acertos: 20, posicao: "Classificado" },
