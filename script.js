@@ -44,7 +44,7 @@ const bancoDeAlunos = [
     },
     {
         nome: "VITOR KAUE SANGEL DE SOUZA",
-        cpf: "022.953.912-47",
+        cpf: "022.935.912-47",
         matricula: "20240004",
         escola: "Escola Conexão Aquarela",
         nivel: "Nível 3 (Ensino Médio)",
