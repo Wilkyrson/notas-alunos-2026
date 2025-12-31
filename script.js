@@ -1,4 +1,4 @@
-        <script>
+<script>
         // DADOS DO PROFESSOR
         const PROFESSOR_DADOS = {
             nome: "WILKYSON CALDAS LIMA",
@@ -75,6 +75,150 @@
         // Inicializar o banco de dados
         salvarBancoDeDados();
 
+        // ========== AUTOCOMPLETE DO NOME (CORRIGIDO) ==========
+        let timeoutBusca = null;
+        const listaAutocomplete = document.createElement('div');
+        listaAutocomplete.className = 'autocomplete-lista';
+
+        // Inicializar autocomplete quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            const nomeInput = document.getElementById('nomeAluno');
+            if (nomeInput && nomeInput.parentElement) {
+                nomeInput.parentElement.style.position = 'relative';
+                nomeInput.parentElement.appendChild(listaAutocomplete);
+                console.log("✅ Autocomplete configurado");
+            }
+        });
+
+        // Evento de input no campo nome (AUTOCOMPLETE FUNCIONANDO)
+        document.getElementById('nomeAluno').addEventListener('input', function(e) {
+            const valor = e.target.value.trim();
+            
+            // Limpar timeout anterior
+            if (timeoutBusca) clearTimeout(timeoutBusca);
+            
+            // Limpar lista se campo vazio
+            if (!valor) {
+                listaAutocomplete.innerHTML = '';
+                listaAutocomplete.style.display = 'none';
+                return;
+            }
+            
+            // Aguardar um pouco antes de buscar (debounce)
+            timeoutBusca = setTimeout(() => {
+                buscarSugestoesNomes(valor);
+            }, 300);
+        });
+
+        // Fechar autocomplete ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.autocomplete-lista') && e.target.id !== 'nomeAluno') {
+                listaAutocomplete.style.display = 'none';
+            }
+        });
+
+        // Função de busca para sugestões de nomes (FUNCIONANDO)
+        function buscarSugestoesNomes(texto) {
+            const textoBusca = texto.toUpperCase().trim();
+            
+            console.log(`🔍 Buscando sugestões para: "${texto}"`);
+            
+            // Apenas buscar se tiver pelo menos 3 caracteres
+            if (textoBusca.length < 3) {
+                listaAutocomplete.innerHTML = '';
+                listaAutocomplete.style.display = 'none';
+                console.log("❌ Busca cancelada: menos de 3 caracteres");
+                return;
+            }
+            
+            // Filtrar alunos cujo nome contenha o texto
+            const sugestoes = bancoDeAlunos.filter(aluno => {
+                const nomeAluno = aluno.nome.toUpperCase();
+                return nomeAluno.includes(textoBusca);
+            }).slice(0, 5); // Limitar a 5 sugestões
+            
+            console.log(`✅ Encontrados ${sugestoes.length} alunos`);
+            
+            if (sugestoes.length === 0) {
+                listaAutocomplete.innerHTML = `
+                    <div class="autocomplete-sem-resultados">
+                        <i class="fas fa-search"></i>
+                        Nenhum aluno encontrado
+                    </div>
+                `;
+                listaAutocomplete.style.display = 'block';
+                return;
+            }
+            
+            // Gerar HTML das sugestões
+            let html = '';
+            sugestoes.forEach(aluno => {
+                // Destacar parte do nome que coincide
+                const nomeFormatado = destacarTexto(aluno.nome, textoBusca);
+                
+                // Abreviar escola se for muito longa
+                const escolaAbreviada = aluno.escola.length > 35 
+                    ? aluno.escola.substring(0, 32) + '...' 
+                    : aluno.escola;
+                
+                html += `
+                    <div class="autocomplete-item" data-nome="${aluno.nome}">
+                        <div class="autocomplete-nome">
+                            <i class="fas fa-user-graduate"></i>
+                            ${nomeFormatado}
+                        </div>
+                        <div class="autocomplete-detalhes">
+                            <span class="autocomplete-escola">
+                                <i class="fas fa-school"></i>
+                                ${escolaAbreviada}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            listaAutocomplete.innerHTML = html;
+            listaAutocomplete.style.display = 'block';
+            
+            // Adicionar eventos aos itens (APENAS PREENCHE O NOME)
+            document.querySelectorAll('.autocomplete-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const nome = this.getAttribute('data-nome');
+                    console.log(`✅ Clicou no aluno: ${nome}`);
+                    
+                    // PREENCHE APENAS O NOME (NÃO PREENCHE CPF)
+                    document.getElementById('nomeAluno').value = nome;
+                    
+                    // Limpa o campo CPF (caso tenha algo)
+                    document.getElementById('cpfAluno').value = '';
+                    
+                    // Foca no campo CPF
+                    document.getElementById('cpfAluno').focus();
+                    
+                    // Esconder lista
+                    listaAutocomplete.style.display = 'none';
+                    
+                    // Mensagem de confirmação
+                    mostrarNotificacao('Aluno selecionado. Digite o CPF para continuar.', 'info');
+                });
+            });
+        }
+
+        // FUNÇÃO PARA DESTACAR TEXTO CORRESPONDENTE
+        function destacarTexto(nomeCompleto, textoBusca) {
+            const nome = nomeCompleto.toUpperCase();
+            const texto = textoBusca.toUpperCase();
+            const indice = nome.indexOf(texto);
+            
+            if (indice === -1) return nomeCompleto;
+            
+            const antes = nomeCompleto.substring(0, indice);
+            const destaque = nomeCompleto.substring(indice, indice + texto.length);
+            const depois = nomeCompleto.substring(indice + texto.length);
+            
+            return `${antes}<strong>${destaque}</strong>${depois}`;
+        }
+
         // ========== GERENCIAMENTO DE MODO ==========
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -91,6 +235,8 @@
                 
                 if (mode === 'aluno') {
                     document.getElementById('aluno-section').classList.add('active');
+                    // Limpar autocomplete ao mudar para área do aluno
+                    listaAutocomplete.style.display = 'none';
                 } else {
                     document.getElementById('professor-section').classList.add('active');
                 }
@@ -115,6 +261,8 @@
 
         document.getElementById('cpfAluno').addEventListener('input', function(e) {
             this.value = formatarCPF(this.value);
+            // Esconder autocomplete ao começar a digitar CPF
+            listaAutocomplete.style.display = 'none';
         });
 
         document.getElementById('novoCpf').addEventListener('input', function(e) {
@@ -123,6 +271,20 @@
 
         document.getElementById('professorCpf').addEventListener('input', function(e) {
             this.value = formatarCPF(this.value);
+        });
+
+        // Permitir Enter para buscar
+        document.getElementById('nomeAluno').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('cpfAluno').focus();
+            }
+        });
+
+        document.getElementById('cpfAluno').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                buscarNotasAluno();
+            }
         });
 
         // ========== LOGIN DO PROFESSOR ==========
@@ -164,6 +326,8 @@
             
             document.querySelector('[data-tab="listar"]').classList.add('active');
             document.getElementById('tab-listar').classList.add('active');
+            
+            mostrarNotificacao('Logout realizado com sucesso!', 'info');
         }
 
         // ========== GERENCIAMENTO DE ABAS ==========
@@ -222,7 +386,7 @@
                         <div class="aluno-card-header">
                             <h3><i class="fas fa-user-graduate"></i> ${aluno.nome}</h3>
                             <div class="aluno-card-actions">
-                                <button class="action-btn edit" onclick="editarAluno(${index})">
+                                <button class="action-btn edit" onclick="editarAlunoModal(${index})">
                                     <i class="fas fa-edit"></i> Editar
                                 </button>
                                 <button class="action-btn delete" onclick="confirmarExclusao(${index})">
@@ -253,6 +417,22 @@
             });
             
             listaAlunos.innerHTML = html;
+        }
+
+        function editarAlunoModal(index) {
+            // Ir para aba de editar
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.querySelector('[data-tab="editar"]').classList.add('active');
+            document.getElementById('tab-editar').classList.add('active');
+            
+            // Selecionar aluno no dropdown
+            const select = document.getElementById('editarAluno');
+            select.value = index;
+            
+            // Carregar dados
+            carregarDadosAlunoParaEdicao();
         }
 
         function atualizarEstatisticas() {
@@ -566,118 +746,6 @@
         }
 
         // ========== ÁREA DO ALUNO ==========
-        // AUTOCOMPLETE
-        let timeoutBusca = null;
-        const listaAutocomplete = document.createElement('div');
-        listaAutocomplete.className = 'autocomplete-lista';
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const nomeInput = document.getElementById('nomeAluno');
-            if (nomeInput && nomeInput.parentElement) {
-                nomeInput.parentElement.style.position = 'relative';
-                nomeInput.parentElement.appendChild(listaAutocomplete);
-            }
-        });
-
-        document.getElementById('nomeAluno').addEventListener('input', function(e) {
-            const valor = e.target.value.trim();
-            
-            if (timeoutBusca) clearTimeout(timeoutBusca);
-            
-            if (!valor) {
-                listaAutocomplete.innerHTML = '';
-                listaAutocomplete.style.display = 'none';
-                return;
-            }
-            
-            timeoutBusca = setTimeout(() => {
-                buscarSugestoes(valor);
-            }, 300);
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.autocomplete-lista') && e.target.id !== 'nomeAluno') {
-                listaAutocomplete.style.display = 'none';
-            }
-        });
-
-        function buscarSugestoes(texto) {
-            const textoBusca = texto.toUpperCase().trim();
-            
-            if (textoBusca.length < 2) {
-                listaAutocomplete.innerHTML = '';
-                listaAutocomplete.style.display = 'none';
-                return;
-            }
-            
-            const sugestoes = bancoDeAlunos.filter(aluno => {
-                const nomeAluno = aluno.nome.toUpperCase();
-                return nomeAluno.includes(textoBusca);
-            }).slice(0, 5);
-            
-            if (sugestoes.length === 0) {
-                listaAutocomplete.innerHTML = `
-                    <div class="autocomplete-sem-resultados">
-                        <i class="fas fa-search"></i>
-                        Nenhum aluno encontrado
-                    </div>
-                `;
-                listaAutocomplete.style.display = 'block';
-                return;
-            }
-            
-            let html = '';
-            sugestoes.forEach(aluno => {
-                const nomeFormatado = destacarTexto(aluno.nome, textoBusca);
-                const escolaAbreviada = aluno.escola.length > 35 
-                    ? aluno.escola.substring(0, 32) + '...' 
-                    : aluno.escola;
-                
-                html += `
-                    <div class="autocomplete-item" data-nome="${aluno.nome}">
-                        <div class="autocomplete-nome">
-                            <i class="fas fa-user-graduate"></i>
-                            ${nomeFormatado}
-                        </div>
-                        <div class="autocomplete-detalhes">
-                            <span class="autocomplete-escola">
-                                <i class="fas fa-school"></i>
-                                ${escolaAbreviada}
-                            </span>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            listaAutocomplete.innerHTML = html;
-            listaAutocomplete.style.display = 'block';
-            
-            document.querySelectorAll('.autocomplete-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    const nome = this.getAttribute('data-nome');
-                    document.getElementById('nomeAluno').value = nome;
-                    document.getElementById('cpfAluno').value = '';
-                    document.getElementById('cpfAluno').focus();
-                    listaAutocomplete.style.display = 'none';
-                });
-            });
-        }
-
-        function destacarTexto(nomeCompleto, textoBusca) {
-            const nome = nomeCompleto.toUpperCase();
-            const texto = textoBusca.toUpperCase();
-            const indice = nome.indexOf(texto);
-            
-            if (indice === -1) return nomeCompleto;
-            
-            const antes = nomeCompleto.substring(0, indice);
-            const destaque = nomeCompleto.substring(indice, indice + texto.length);
-            const depois = nomeCompleto.substring(indice + texto.length);
-            
-            return `${antes}<strong>${destaque}</strong>${depois}`;
-        }
-
-        // BUSCA DE NOTAS DO ALUNO
         function buscarNotasAluno() {
             const nomeDigitado = document.getElementById('nomeAluno').value.trim().toUpperCase();
             const cpfDigitado = document.getElementById('cpfAluno').value.trim();
@@ -776,48 +844,4 @@
                 
                 <div class="notas-grid">
                     <div class="nota-card">
-                        <h3><i class="fas fa-flag"></i> FASE 1</h3>
-                        <div class="nota-valor">${aluno.notas.fase1.nota}</div>
-                        <div class="nota-detalhes">
-                            <p><i class="fas fa-check-circle"></i> ${aluno.notas.fase1.acertos} acertos</p>
-                            <p><i class="fas fa-chart-line"></i> ${aluno.notas.fase1.posicao}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="nota-card">
-                        <h3><i class="fas fa-flag-checkered"></i> FASE 2</h3>
-                        <div class="nota-valor">${aluno.notas.fase2.nota}</div>
-                        <div class="nota-detalhes">
-                            <p><i class="fas fa-check-circle"></i> ${aluno.notas.fase2.acertos} problemas</p>
-                            <p><i class="fas fa-hourglass-half"></i> ${aluno.notas.fase2.posicao}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="nota-card">
-                        <h3><i class="fas fa-clipboard-check"></i> SIMULADOS</h3>
-                        <div class="nota-valor">${aluno.notas.simulados.nota}%</div>
-                        <div class="nota-detalhes">
-                            <p><i class="fas fa-chart-line"></i> Média: ${aluno.notas.simulados.media_turma}%</p>
-                            <p><i class="fas fa-ranking-star"></i> ${aluno.notas.simulados.nota > aluno.notas.simulados.media_turma ? 'Acima da média' : 'Na média'}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="nota-card">
-                        <h3><i class="fas fa-dumbbell"></i> TREINAMENTOS</h3>
-                        <div class="nota-valor">${aluno.notas.treinamentos.nota}%</div>
-                        <div class="nota-detalhes">
-                            <p><i class="fas fa-calendar-check"></i> ${aluno.notas.treinamentos.participacao}</p>
-                            <p><i class="fas fa-fire"></i> ${aluno.notas.treinamentos.nota >= 90 ? 'Alta dedicação' : 'Boa dedicação'}</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="status-container">
-                    <div class="media-geral">
-                        <h3><i class="fas fa-chart-bar"></i> DESEMPENHO GERAL</h3>
-                        <div class="media-valor">${mediaGeral}%</div>
-                        <div class="status ${statusClass}">${status}</div>
-                    </div>
-                    
-                    <div class="premiacoes-box">
-                        <h3><i class="fas fa-trophy
+                        <h3><i class="fas fa-
