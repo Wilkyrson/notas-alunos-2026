@@ -72,111 +72,94 @@ function salvarBancoDeDados() {
 }
 salvarBancoDeDados();
 
-// ========== AUTOCOMPLETE CORRIGIDO ==========
+// ========== AUTOCOMPLETE SIMPLIFICADO E FUNCIONAL ==========
 let timeoutBusca = null;
-let listaAutocomplete = null;
 
-// Inicializar autocomplete quando a página carregar
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM carregado - inicializando autocomplete");
-    
-    // Criar elemento do autocomplete
-    listaAutocomplete = document.createElement('div');
-    listaAutocomplete.className = 'autocomplete-lista';
-    listaAutocomplete.id = 'autocomplete-lista';
-    listaAutocomplete.style.display = 'none';
-    
-    // Adicionar ao container do campo nome
-    const nomeInput = document.getElementById('nomeAluno');
-    if (nomeInput) {
-        const container = nomeInput.parentElement;
-        container.style.position = 'relative';
-        container.appendChild(listaAutocomplete);
-        console.log("✅ Autocomplete adicionado ao DOM");
-    }
-    
-    // Carregar dados iniciais
+// Inicializar quando a página carregar
+window.onload = function() {
+    console.log("🚀 Sistema carregado!");
+    inicializarAutocomplete();
     carregarAlunos();
     atualizarEstatisticas();
     preencherSelectAlunos();
-});
+    
+    // Teste: Digite "JOAO" para ver o autocomplete funcionar
+    console.log("💡 Digite 'JOAO' no campo nome para testar o autocomplete");
+};
 
-// Evento de input no campo nome - CORRIGIDO
+function inicializarAutocomplete() {
+    const nomeInput = document.getElementById('nomeAluno');
+    const container = nomeInput.parentElement;
+    
+    // Criar container do autocomplete
+    const autocompleteDiv = document.createElement('div');
+    autocompleteDiv.className = 'autocomplete-lista';
+    autocompleteDiv.id = 'autocomplete-container';
+    
+    // Adicionar ao DOM
+    container.style.position = 'relative';
+    container.appendChild(autocompleteDiv);
+    
+    console.log("✅ Autocomplete inicializado");
+}
+
+// Evento de input no campo nome
 document.getElementById('nomeAluno').addEventListener('input', function(e) {
     const valor = e.target.value.trim();
     
-    // Limpar timeout anterior
     if (timeoutBusca) clearTimeout(timeoutBusca);
     
-    // Limpar lista se campo vazio
     if (!valor) {
-        if (listaAutocomplete) {
-            listaAutocomplete.innerHTML = '';
-            listaAutocomplete.style.display = 'none';
-        }
+        esconderAutocomplete();
         return;
     }
     
-    // Aguardar antes de buscar (debounce)
     timeoutBusca = setTimeout(() => {
-        buscarSugestoesNomes(valor);
+        buscarSugestoes(valor);
     }, 300);
 });
 
-// Fechar autocomplete ao clicar fora
-document.addEventListener('click', function(e) {
-    if (listaAutocomplete && 
-        !e.target.closest('#autocomplete-lista') && 
-        e.target.id !== 'nomeAluno') {
-        listaAutocomplete.style.display = 'none';
-    }
-});
-
-// Função de busca para sugestões de nomes - CORRIGIDO
-function buscarSugestoesNomes(texto) {
-    console.log(`🔍 Buscando sugestões para: "${texto}"`);
-    
-    if (!listaAutocomplete) {
-        console.error("❌ Elemento autocomplete não encontrado!");
-        return;
-    }
-    
+// Buscar sugestões
+function buscarSugestoes(texto) {
     const textoBusca = texto.toUpperCase().trim();
     
     // Apenas buscar se tiver pelo menos 3 caracteres
     if (textoBusca.length < 3) {
-        listaAutocomplete.innerHTML = '';
-        listaAutocomplete.style.display = 'none';
-        console.log("❌ Busca cancelada: menos de 3 caracteres");
+        esconderAutocomplete();
         return;
     }
     
     // Filtrar alunos
-    const sugestoes = bancoDeAlunos.filter(aluno => {
-        const nomeAluno = aluno.nome.toUpperCase();
-        return nomeAluno.includes(textoBusca);
-    }).slice(0, 5);
+    const sugestoes = bancoDeAlunos.filter(aluno => 
+        aluno.nome.toUpperCase().includes(textoBusca)
+    ).slice(0, 5);
     
-    console.log(`✅ Encontrados ${sugestoes.length} alunos`);
+    mostrarSugestoes(sugestoes, textoBusca);
+}
+
+function mostrarSugestoes(sugestoes, textoBusca) {
+    const autocompleteDiv = document.getElementById('autocomplete-container');
+    
+    if (!autocompleteDiv) {
+        console.error("❌ Elemento autocomplete não encontrado!");
+        return;
+    }
     
     if (sugestoes.length === 0) {
-        listaAutocomplete.innerHTML = `
+        autocompleteDiv.innerHTML = `
             <div class="autocomplete-sem-resultados">
                 <i class="fas fa-search"></i>
                 Nenhum aluno encontrado
             </div>
         `;
-        listaAutocomplete.style.display = 'block';
+        autocompleteDiv.style.display = 'block';
         return;
     }
     
-    // Gerar HTML
     let html = '';
     sugestoes.forEach(aluno => {
-        // Destacar texto correspondente
+        // Destacar texto
         const nomeFormatado = destacarTexto(aluno.nome, textoBusca);
-        
-        // Abreviar escola
         const escolaAbreviada = aluno.escola.length > 35 
             ? aluno.escola.substring(0, 32) + '...' 
             : aluno.escola;
@@ -197,32 +180,24 @@ function buscarSugestoesNomes(texto) {
         `;
     });
     
-    listaAutocomplete.innerHTML = html;
-    listaAutocomplete.style.display = 'block';
+    autocompleteDiv.innerHTML = html;
+    autocompleteDiv.style.display = 'block';
     
-    // Adicionar eventos aos itens
+    // Adicionar eventos de clique
     document.querySelectorAll('.autocomplete-item').forEach(item => {
         item.addEventListener('click', function() {
             const nome = this.getAttribute('data-nome');
-            console.log(`✅ Clicou no aluno: ${nome}`);
-            
-            // Preencher apenas o nome
             document.getElementById('nomeAluno').value = nome;
-            
-            // Limpar e focar no CPF
             document.getElementById('cpfAluno').value = '';
             document.getElementById('cpfAluno').focus();
+            esconderAutocomplete();
             
-            // Esconder autocomplete
-            listaAutocomplete.style.display = 'none';
-            
-            // Mostrar notificação
-            mostrarNotificacao('Aluno selecionado. Digite o CPF para continuar.', 'info');
+            // Feedback visual
+            mostrarFeedback('Aluno selecionado. Digite o CPF para continuar.');
         });
     });
 }
 
-// Função para destacar texto
 function destacarTexto(nomeCompleto, textoBusca) {
     const nome = nomeCompleto.toUpperCase();
     const texto = textoBusca.toUpperCase();
@@ -236,6 +211,37 @@ function destacarTexto(nomeCompleto, textoBusca) {
     
     return `${antes}<strong>${destaque}</strong>${depois}`;
 }
+
+function esconderAutocomplete() {
+    const autocompleteDiv = document.getElementById('autocomplete-container');
+    if (autocompleteDiv) {
+        autocompleteDiv.style.display = 'none';
+    }
+}
+
+function mostrarFeedback(mensagem) {
+    const feedback = document.createElement('div');
+    feedback.className = 'notification info';
+    feedback.innerHTML = `
+        <i class="fas fa-info-circle"></i>
+        <span>${mensagem}</span>
+    `;
+    
+    document.body.appendChild(feedback);
+    
+    setTimeout(() => {
+        if (feedback.parentNode) {
+            feedback.remove();
+        }
+    }, 3000);
+}
+
+// Fechar autocomplete ao clicar fora
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#autocomplete-container') && e.target.id !== 'nomeAluno') {
+        esconderAutocomplete();
+    }
+});
 
 // ========== FORMATAÇÃO DE CPF ==========
 function formatarCPF(cpf) {
@@ -253,10 +259,9 @@ function formatarCPF(cpf) {
     return cpf;
 }
 
-// Eventos de formatação de CPF
 document.getElementById('cpfAluno').addEventListener('input', function(e) {
     this.value = formatarCPF(this.value);
-    if (listaAutocomplete) listaAutocomplete.style.display = 'none';
+    esconderAutocomplete();
 });
 
 document.getElementById('novoCpf').addEventListener('input', function(e) {
@@ -289,7 +294,6 @@ function loginProfessor() {
         
         document.getElementById('login-professor').style.display = 'none';
         document.getElementById('dashboard-professor').classList.add('active');
-        document.getElementById('professorLogado').textContent = `CPF: ${PROFESSOR_DADOS.cpf}`;
         
         mostrarNotificacao('Login realizado com sucesso!', 'success');
         
@@ -308,8 +312,6 @@ function logoutProfessor() {
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     document.querySelector('[data-tab="listar"]').classList.add('active');
     document.getElementById('tab-listar').classList.add('active');
-    
-    mostrarNotificacao('Logout realizado com sucesso!', 'info');
 }
 
 // ========== GERENCIAMENTO DE ABAS ==========
@@ -317,18 +319,15 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const tabId = this.getAttribute('data-tab');
         
-        // Atualizar botões ativos
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
         
-        // Mostrar conteúdo correto
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
         
         document.getElementById(`tab-${tabId}`).classList.add('active');
         
-        // Ações específicas por aba
         if (tabId === 'listar') {
             carregarAlunos();
         } else if (tabId === 'editar') {
@@ -695,7 +694,7 @@ function buscarNotasAluno() {
     
     document.getElementById('resultado-aluno').style.display = 'none';
     document.getElementById('erro-aluno').style.display = 'none';
-    if (listaAutocomplete) listaAutocomplete.style.display = 'none';
+    esconderAutocomplete();
     
     if (!nomeDigitado || !cpfDigitado) {
         mostrarErroAluno('Por favor, preencha todos os campos.');
@@ -823,4 +822,84 @@ function exibirResultadosAluno(aluno) {
                 <div class="nota-valor">${aluno.notas.treinamentos.nota}%</div>
                 <div class="nota-detalhes">
                     <p><i class="fas fa-calendar-check"></i> ${aluno.notas.treinamentos.participacao}</p>
-                    <p><i class="fas fa-fire"></i>
+                    <p><i class="fas fa-fire"></i> ${aluno.notas.treinamentos.nota >= 90 ? 'Alta dedicação' : 'Boa dedicação'}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-container">
+            <div class="media-geral">
+                <h3><i class="fas fa-chart-bar"></i> DESEMPENHO GERAL</h3>
+                <div class="media-valor">${mediaGeral}%</div>
+                <div class="status ${statusClass}">${status}</div>
+            </div>
+            
+            <div class="premiacoes-box">
+                <h3><i class="fas fa-trophy"></i> PREMIAÇÕES</h3>
+                <div class="premiacoes-lista">
+                    ${aluno.premiacoes.length > 0 
+                        ? aluno.premiacoes.map(premio => `
+                            <div class="premiacao-item">
+                                <i class="fas fa-medal"></i>
+                                <span>${premio}</span>
+                            </div>
+                        `).join('')
+                        : '<p class="sem-premiacao">Sem premiações anteriores</p>'
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn-print" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimir Relatório
+            </button>
+            <button class="btn-logout" onclick="limparFormularioAluno()">
+                <i class="fas fa-redo"></i> Nova Consulta
+            </button>
+        </div>
+    `;
+    
+    document.getElementById('resultado-aluno').innerHTML = resultadoHTML;
+    document.getElementById('resultado-aluno').style.display = 'block';
+    
+    // Rolar até os resultados
+    document.getElementById('resultado-aluno').scrollIntoView({ behavior: 'smooth' });
+}
+
+function limparFormularioAluno() {
+    document.getElementById('nomeAluno').value = '';
+    document.getElementById('cpfAluno').value = '';
+    document.getElementById('resultado-aluno').style.display = 'none';
+    document.getElementById('erro-aluno').style.display = 'none';
+    document.getElementById('nomeAluno').focus();
+}
+
+// ========== GERENCIAMENTO DE MODO ==========
+document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const mode = this.getAttribute('data-mode');
+        
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        document.querySelectorAll('.aluno-section, .professor-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        if (mode === 'aluno') {
+            document.getElementById('aluno-section').classList.add('active');
+            esconderAutocomplete();
+        } else {
+            document.getElementById('professor-section').classList.add('active');
+        }
+    });
+});
+
+// Focar no campo de nome ao carregar
+window.onload = function() {
+    document.getElementById('nomeAluno').focus();
+    console.log("🚀 Sistema carregado!");
+    console.log("💡 Teste: Digite 'JOAO' no campo nome para ver o autocomplete");
+};
+</script>
