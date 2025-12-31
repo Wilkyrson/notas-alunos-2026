@@ -603,4 +603,429 @@
             background: none;
             border: none;
             font-size: 1.5rem;
-            color: #64748b
+            color: #64748b;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #e53e3e;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #64748b;
+            font-size: 0.9rem;
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Notificação */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 3000;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #38a169, #2f855a);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .mode-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .mode-btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+            
+            .dashboard-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .tab-menu {
+                flex-wrap: wrap;
+            }
+            
+            .tab-btn {
+                flex: 1;
+                justify-content: center;
+                min-width: 120px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .form-group {
+                min-width: 100%;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .consult-box, .login-box, .dashboard {
+                padding: 20px;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <i class="fas fa-graduation-cap logo"></i>
+            <h1>Sistema Acadêmico - <span class="professor-name">Prof. Wilkyson</span></h1>
+            <p class="subtitle">Sistema completo para consulta de notas (alunos) e gerenciamento acadêmico (professores)</p>
+            
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="aluno">
+                    <i class="fas fa-user-graduate"></i> Área do Aluno
+                </button>
+                <button class="mode-btn" data-mode="professor">
+                    <i class="fas fa-chalkboard-teacher"></i> Área do Professor
+                </button>
+            </div>
+        </header>
+
+        <!-- ÁREA DO ALUNO -->
+        <section id="aluno-section" class="aluno-section active">
+            <div class="consult-box">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nomeAluno"><i class="fas fa-user"></i> Nome Completo</label>
+                        <input type="text" id="nomeAluno" class="form-control" placeholder="Digite o nome do aluno..." autocomplete="off">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cpfAluno"><i class="fas fa-id-card"></i> CPF</label>
+                        <input type="text" id="cpfAluno" class="form-control" placeholder="000.000.000-00" autocomplete="off">
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="buscarNotasAluno()">
+                    <i class="fas fa-search"></i> Consultar Notas
+                </button>
+            </div>
+            
+            <div id="loading-aluno" class="loading">
+                <div class="spinner"></div>
+                <p>Buscando informações do aluno...</p>
+            </div>
+            
+            <div id="erro-aluno" class="error-box"></div>
+            
+            <div id="resultado-aluno" class="result-box"></div>
+        </section>
+
+        <!-- ÁREA DO PROFESSOR -->
+        <section id="professor-section" class="professor-section">
+            <!-- Login do Professor -->
+            <div id="login-professor" class="login-box">
+                <h2><i class="fas fa-lock"></i> Acesso Restrito - Professor</h2>
+                <div class="welcome-message" style="margin-bottom: 20px;">
+                    <i class="fas fa-user-tie"></i> Bem-vindo, <strong>Prof. Wilkyson Caldas Lima</strong>. Acesse com suas credenciais.
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="professorNome"><i class="fas fa-user-tie"></i> Nome Completo</label>
+                        <input type="text" id="professorNome" class="form-control" value="WILKYSON CALDAS LIMA" readonly style="background-color: #e2e8f0;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="professorCpf"><i class="fas fa-fingerprint"></i> CPF</label>
+                        <input type="text" id="professorCpf" class="form-control" value="040.385.812-76" readonly style="background-color: #e2e8f0;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="professorSenha"><i class="fas fa-key"></i> Senha</label>
+                    <input type="password" id="professorSenha" class="form-control" placeholder="Digite sua senha..." autocomplete="off">
+                    <small style="color: #4299e1; margin-top: 5px; display: block;">
+                        <i class="fas fa-info-circle"></i> Use "wilkyson2024" para acessar
+                    </small>
+                </div>
+                
+                <button class="btn" onclick="loginProfessor()">
+                    <i class="fas fa-sign-in-alt"></i> Entrar como Professor
+                </button>
+            </div>
+
+            <!-- Dashboard do Professor (após login) -->
+            <div id="dashboard-professor" class="dashboard">
+                <div class="dashboard-header">
+                    <h2><i class="fas fa-chalkboard-teacher"></i> Painel do Professor - <span style="color: #4299e1;">Wilkyson Caldas Lima</span></h2>
+                    <div class="professor-info">
+                        <span id="professorLogado" style="font-weight: 600; color: #2d3748;">CPF: 040.385.812-76</span>
+                        <button class="btn btn-secondary" onclick="logoutProfessor()" style="width: auto; padding: 10px 20px;">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="welcome-message">
+                    <i class="fas fa-info-circle"></i> Bem-vindo ao seu painel de controle, <strong>Prof. Wilkyson</strong>. Aqui você pode gerenciar todos os alunos e suas notas.
+                </div>
+                
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Total de Alunos</div>
+                        <div class="stat-value" id="totalAlunos">0</div>
+                        <i class="fas fa-users" style="color: #4299e1; font-size: 2rem;"></i>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Média Geral</div>
+                        <div class="stat-value" id="mediaGeral">0%</div>
+                        <i class="fas fa-chart-line" style="color: #38a169; font-size: 2rem;"></i>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Aguardando Fase 2</div>
+                        <div class="stat-value" id="aguardandoFase2">0</div>
+                        <i class="fas fa-hourglass-half" style="color: #d69e2e; font-size: 2rem;"></i>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Classificados</div>
+                        <div class="stat-value" id="classificados">0</div>
+                        <i class="fas fa-medal" style="color: #805ad5; font-size: 2rem;"></i>
+                    </div>
+                </div>
+                
+                <div class="tab-menu">
+                    <button class="tab-btn active" data-tab="listar">
+                        <i class="fas fa-list"></i> Listar Alunos
+                    </button>
+                    <button class="tab-btn" data-tab="cadastrar">
+                        <i class="fas fa-user-plus"></i> Cadastrar Aluno
+                    </button>
+                    <button class="tab-btn" data-tab="editar">
+                        <i class="fas fa-edit"></i> Editar Notas
+                    </button>
+                </div>
+                
+                <!-- Tab: Listar Alunos -->
+                <div id="tab-listar" class="tab-content active">
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" onclick="carregarAlunos()">
+                            <i class="fas fa-sync-alt"></i> Atualizar Lista
+                        </button>
+                        <button class="btn btn-success" onclick="exportarDados()">
+                            <i class="fas fa-file-export"></i> Exportar Dados
+                        </button>
+                    </div>
+                    
+                    <div class="alunos-list" id="listaAlunos">
+                        <!-- Lista de alunos será carregada aqui -->
+                    </div>
+                </div>
+                
+                <!-- Tab: Cadastrar Aluno -->
+                <div id="tab-cadastrar" class="tab-content">
+                    <div class="form-box">
+                        <h3><i class="fas fa-user-plus"></i> Cadastrar Novo Aluno</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="novoNome"><i class="fas fa-user"></i> Nome Completo *</label>
+                                <input type="text" id="novoNome" class="form-control" placeholder="Nome completo do aluno">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="novoCpf"><i class="fas fa-id-card"></i> CPF *</label>
+                                <input type="text" id="novoCpf" class="form-control" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="novaMatricula"><i class="fas fa-hashtag"></i> Matrícula *</label>
+                                <input type="text" id="novaMatricula" class="form-control" placeholder="Número de matrícula">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="novaEscola"><i class="fas fa-school"></i> Escola *</label>
+                                <input type="text" id="novaEscola" class="form-control" placeholder="Nome da escola">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="novoNivel"><i class="fas fa-layer-group"></i> Nível *</label>
+                                <select id="novoNivel" class="form-control">
+                                    <option value="Nível 1 (Ensino Fundamental)">Nível 1 (Ensino Fundamental)</option>
+                                    <option value="Nível 2 (Ensino Fundamental II)">Nível 2 (Ensino Fundamental II)</option>
+                                    <option value="Nível 3 (Ensino Médio)" selected>Nível 3 (Ensino Médio)</option>
+                                    <option value="Nível 4 (Pré-Vestibular)">Nível 4 (Pré-Vestibular)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <h4 style="margin: 25px 0 15px 0; color: #4a5568; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-clipboard-list"></i> Notas Iniciais
+                        </h4>
+                        
+                        <div class="notas-form-grid">
+                            <div class="nota-field">
+                                <label>Fase 1 - Nota</label>
+                                <input type="number" id="novaNotaFase1" class="form-control" min="0" max="30" step="0.5" value="0">
+                            </div>
+                            
+                            <div class="nota-field">
+                                <label>Fase 1 - Acertos</label>
+                                <input type="number" id="novaAcertosFase1" class="form-control" min="0" max="30" value="0">
+                            </div>
+                            
+                            <div class="nota-field">
+                                <label>Fase 2 - Nota</label>
+                                <input type="number" id="novaNotaFase2" class="form-control" min="0" max="50" step="0.5" value="0">
+                            </div>
+                            
+                            <div class="nota-field">
+                                <label>Fase 2 - Acertos</label>
+                                <input type="number" id="novaAcertosFase2" class="form-control" min="0" max="10" value="0">
+                            </div>
+                            
+                            <div class="nota-field">
+                                <label>Simulados - Nota (%)</label>
+                                <input type="number" id="novaNotaSimulados" class="form-control" min="0" max="100" value="0">
+                            </div>
+                            
+                            <div class="nota-field">
+                                <label>Treinamentos - Nota (%)</label>
+                                <input type="number" id="novaNotaTreinamentos" class="form-control" min="0" max="100" value="0">
+                            </div>
+                            
+                            <div class="nota-field">
+                                <label>Treinamentos - Participação (%)</label>
+                                <input type="number" id="novaParticipacaoTreinamentos" class="form-control" min="0" max="100" value="100">
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-success" onclick="cadastrarAluno()">
+                                <i class="fas fa-save"></i> Cadastrar Aluno
+                            </button>
+                            <button class="btn btn-secondary" onclick="limparFormularioCadastro()">
+                                <i class="fas fa-eraser"></i> Limpar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab: Editar Notas -->
+                <div id="tab-editar" class="tab-content">
+                    <div class="form-box">
+                        <h3><i class="fas fa-edit"></i> Editar Notas de Aluno</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="editarAluno"><i class="fas fa-user-graduate"></i> Selecionar Aluno *</label>
+                                <select id="editarAluno" class="form-control" onchange="carregarDadosAlunoParaEdicao()">
+                                    <option value="">Selecione um aluno...</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="form-editar-notas" style="display: none;">
+                            <h4 style="margin: 25px 0 15px 0; color: #4a5568; display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-clipboard-list"></i> Editar Notas
+                            </h4>
+                            
+                            <div class="notas-form-grid">
+                                <div class="nota-field">
+                                    <label>Fase 1 - Nota</label>
+                                    <input type="number" id="editarNotaFase1" class="form-control" min="0" max="30" step="0.5">
+                                </div>
+                                
+                                <div class="nota-field">
+                                    <label>Fase 1 - Acertos</label>
+                                    <input type="number" id="editarAcertosFase1" class="form-control" min="0" max="30">
+                                </div>
+                                
+                                <div class="nota-field">
+                                    <label>Fase 1 - Posição</label>
+                                    <select id="editarPosicaoFase1" class="form-control">
+                                        <option value="Classificado">Classificado</option>
+                                        <option value="Aguardando">Aguardando</option>
+                                        <option value="Não Classificado">Não Classificado</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="nota-field">
+                                    <label>Fase 2 - Nota</label>
+                                    <input type="number" id="editarNotaFase2" class="form-control" min="0" max="50" step="0.5">
+                                </div>
+                                
+                                <div class="nota-field">
+                                    <label>Fase 2 - Acertos</label>
+                                    <input type="number" id="editarAcertosFase2" class="form-control" min="0" max="10">
+                                </div>
+                                
+                                <div class="nota-field">
+                                    <label>Fase 2 - Posição</label>
+                                    <select id="editarPosicaoFase2" class="form-control">
+                                        <option value="Aguardando">Aguardando</option>
+                                        <option value="Classificado">Classificado</option>
+                                        <option value="Desclassificado">Desclassificado</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="nota-field">
+                                    <label>Sim
