@@ -1898,4 +1898,335 @@
             document.getElementById('novaNotaFase2').value = '0';
             document.getElementById('novaAcertosFase2').value = '0';
             document.getElementById('novaNotaSimulados').value = '0';
-            document.getElementById('novaNotaTreinamentos').
+            document.getElementById('novaNotaTreinamentos').value = '0';
+            document.getElementById('novaParticipacaoTreinamentos').value = '100';
+        }
+
+        // ========== FUNÇÕES DE EXCLUSÃO CORRIGIDAS ==========
+        
+        // Função para confirmar exclusão (usada nos cards)
+        function confirmarExclusao(index) {
+            const aluno = bancoDeAlunos[index];
+            
+            if (confirm(`Tem certeza que deseja excluir o aluno "${aluno.nome}"?\n\nCPF: ${aluno.cpf}\nMatrícula: ${aluno.matricula}\n\nEsta ação não pode ser desfeita!`)) {
+                const alunoExcluido = bancoDeAlunos[index];
+                bancoDeAlunos.splice(index, 1);
+                salvarBancoDeDados();
+                carregarAlunos();
+                atualizarEstatisticas();
+                preencherSelectAlunos();
+                
+                // Limpar formulário de edição se o aluno excluído estava selecionado
+                const select = document.getElementById('editarAluno');
+                if (select.value === index.toString()) {
+                    select.value = '';
+                    document.getElementById('form-editar-notas').style.display = 'none';
+                }
+                
+                mostrarNotificacao(`Aluno "${alunoExcluido.nome}" excluído com sucesso!`, 'success');
+            }
+        }
+
+        // Função para excluir aluno selecionado no dropdown (usada no botão "Excluir Aluno")
+        function excluirAlunoSelecionado() {
+            const select = document.getElementById('editarAluno');
+            const index = select.value;
+            
+            if (index === '') {
+                mostrarNotificacao('Selecione um aluno para excluir!', 'error');
+                return;
+            }
+            
+            confirmarExclusao(parseInt(index));
+        }
+
+        function exportarDados() {
+            const dadosParaExportar = {
+                professor: PROFESSOR_DADOS,
+                dataExportacao: new Date().toISOString(),
+                totalAlunos: bancoDeAlunos.length,
+                alunos: bancoDeAlunos
+            };
+            
+            const dadosString = JSON.stringify(dadosParaExportar, null, 2);
+            const blob = new Blob([dadosString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup-alunos-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            URL.revokeObjectURL(url);
+            
+            mostrarNotificacao('Dados exportados com sucesso!', 'success');
+        }
+
+        function importarDados() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const dados = JSON.parse(e.target.result);
+                        
+                        if (dados.alunos && Array.isArray(dados.alunos)) {
+                            if (confirm(`Deseja importar ${dados.alunos.length} alunos?`)) {
+                                // Adicionar novos alunos
+                                const novosAlunos = dados.alunos.filter(novoAluno => {
+                                    // Verificar se aluno já existe pelo CPF
+                                    return !bancoDeAlunos.some(alunoExistente => 
+                                        alunoExistente.cpf.replace(/\D/g, '') === novoAluno.cpf.replace(/\D/g, '')
+                                    );
+                                });
+                                
+                                if (novosAlunos.length === 0) {
+                                    mostrarNotificacao('Nenhum novo aluno para importar (todos já existem).', 'info');
+                                    return;
+                                }
+                                
+                                bancoDeAlunos = [...bancoDeAlunos, ...novosAlunos];
+                                salvarBancoDeDados();
+                                carregarAlunos();
+                                atualizarEstatisticas();
+                                preencherSelectAlunos();
+                                
+                                mostrarNotificacao(`${novosAlunos.length} alunos importados com sucesso!`, 'success');
+                            }
+                        } else {
+                            mostrarNotificacao('Arquivo inválido! Formato incorreto.', 'error');
+                        }
+                    } catch (error) {
+                        mostrarNotificacao('Erro ao ler arquivo! Verifique o formato.', 'error');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        // ========== SISTEMA DE NOTIFICAÇÕES ==========
+        function mostrarNotificacao(mensagem, tipo = 'info') {
+            const notificacaoAnterior = document.querySelector('.notification');
+            if (notificacaoAnterior) notificacaoAnterior.remove();
+            
+            const notificacao = document.createElement('div');
+            notificacao.className = `notification ${tipo}`;
+            notificacao.innerHTML = `
+                <i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${mensagem}</span>
+            `;
+            
+            document.body.appendChild(notificacao);
+            
+            setTimeout(() => {
+                if (notificacao.parentNode) {
+                    notificacao.remove();
+                }
+            }, 5000);
+        }
+
+        // ========== ÁREA DO ALUNO ==========
+        function buscarNotasAluno() {
+            const nomeDigitado = document.getElementById('nomeAluno').value.trim().toUpperCase();
+            const cpfDigitado = document.getElementById('cpfAluno').value.trim();
+            
+            document.getElementById('resultado-aluno').style.display = 'none';
+            document.getElementById('erro-aluno').style.display = 'none';
+            esconderAutocomplete();
+            
+            if (!nomeDigitado || !cpfDigitado) {
+                mostrarErroAluno('Por favor, preencha todos os campos.');
+                return;
+            }
+            
+            const cpfLimpo = cpfDigitado.replace(/\D/g, '');
+            if (cpfLimpo.length !== 11) {
+                mostrarErroAluno('CPF inválido. Digite os 11 números.');
+                return;
+            }
+            
+            document.getElementById('loading-aluno').style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('loading-aluno').style.display = 'none';
+                
+                const alunoEncontrado = bancoDeAlunos.find(aluno => 
+                    aluno.cpf.replace(/\D/g, '') === cpfLimpo
+                );
+                
+                if (!alunoEncontrado) {
+                    mostrarErroAluno('CPF não encontrado no sistema.');
+                    return;
+                }
+                
+                const nomeAluno = alunoEncontrado.nome.toUpperCase();
+                if (!nomeAluno.includes(nomeDigitado) && !nomeDigitado.includes(nomeAluno)) {
+                    mostrarErroAluno('Nome não corresponde ao CPF informado.');
+                    return;
+                }
+                
+                exibirResultadosAluno(alunoEncontrado);
+                
+            }, 1000);
+        }
+
+        function mostrarErroAluno(mensagem) {
+            document.getElementById('erro-aluno').innerHTML = `
+                <div class="error-content">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>${mensagem}</h3>
+                    <p class="erro-dica">Verifique se os dados estão corretos.</p>
+                </div>
+            `;
+            document.getElementById('erro-aluno').style.display = 'block';
+        }
+
+        function exibirResultadosAluno(aluno) {
+            const notasValores = [
+                aluno.notas.fase1.nota,
+                aluno.notas.fase2.nota,
+                aluno.notas.simulados.nota,
+                aluno.notas.treinamentos.nota
+            ];
+            const mediaGeral = (notasValores.reduce((a, b) => a + b, 0) / notasValores.length).toFixed(1);
+            
+            let status = "";
+            let statusClass = "";
+            
+            if (mediaGeral >= 80) {
+                status = "EXCELENTE";
+                statusClass = "aprovado";
+            } else if (mediaGeral >= 60) {
+                status = "BOM";
+                statusClass = "recuperacao";
+            } else {
+                status = "EM DESENVOLVIMENTO";
+                statusClass = "reprovado";
+            }
+            
+            const resultadoHTML = `
+                <div class="aluno-info">
+                    <div class="aluno-header">
+                        <h2><i class="fas fa-user-graduate"></i> ${aluno.nome}</h2>
+                        <span class="aluno-nivel">${aluno.nivel}</span>
+                    </div>
+                    
+                    <div class="aluno-details">
+                        <div class="detail-item">
+                            <i class="fas fa-id-card"></i>
+                            <span><strong>CPF:</strong> ${aluno.cpf}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-hashtag"></i>
+                            <span><strong>Matrícula:</strong> ${aluno.matricula}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-school"></i>
+                            <span><strong>Escola:</strong> ${aluno.escola}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="notas-grid">
+                    <div class="nota-card">
+                        <h3><i class="fas fa-flag"></i> FASE 1</h3>
+                        <div class="nota-valor">${aluno.notas.fase1.nota}</div>
+                        <div class="nota-detalhes">
+                            <p><i class="fas fa-check-circle"></i> ${aluno.notas.fase1.acertos} acertos</p>
+                            <p><i class="fas fa-chart-line"></i> ${aluno.notas.fase1.posicao}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="nota-card">
+                        <h3><i class="fas fa-flag-checkered"></i> FASE 2</h3>
+                        <div class="nota-valor">${aluno.notas.fase2.nota}</div>
+                        <div class="nota-detalhes">
+                            <p><i class="fas fa-check-circle"></i> ${aluno.notas.fase2.acertos} problemas</p>
+                            <p><i class="fas fa-hourglass-half"></i> ${aluno.notas.fase2.posicao}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="nota-card">
+                        <h3><i class="fas fa-clipboard-check"></i> SIMULADOS</h3>
+                        <div class="nota-valor">${aluno.notas.simulados.nota}%</div>
+                        <div class="nota-detalhes">
+                            <p><i class="fas fa-chart-line"></i> Média: ${aluno.notas.simulados.media_turma}%</p>
+                            <p><i class="fas fa-ranking-star"></i> ${aluno.notas.simulados.nota > aluno.notas.simulados.media_turma ? 'Acima da média' : 'Na média'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="nota-card">
+                        <h3><i class="fas fa-dumbbell"></i> TREINAMENTOS</h3>
+                        <div class="nota-valor">${aluno.notas.treinamentos.nota}%</div>
+                        <div class="nota-detalhes">
+                            <p><i class="fas fa-calendar-check"></i> ${aluno.notas.treinamentos.participacao}</p>
+                            <p><i class="fas fa-fire"></i> ${aluno.notas.treinamentos.nota >= 90 ? 'Alta dedicação' : 'Boa dedicação'}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="status-container">
+                    <div class="media-geral">
+                        <h3><i class="fas fa-chart-bar"></i> DESEMPENHO GERAL</h3>
+                        <div class="media-valor">${mediaGeral}%</div>
+                        <div class="status ${statusClass}">${status}</div>
+                    </div>
+                    
+                    <div class="premiacoes-box">
+                        <h3><i class="fas fa-trophy"></i> PREMIAÇÕES</h3>
+                        <div class="premiacoes-lista">
+                            ${aluno.premiacoes.length > 0 
+                                ? aluno.premiacoes.map(premio => `
+                                    <div class="premiacao-item">
+                                        <i class="fas fa-medal"></i>
+                                        <span>${premio}</span>
+                                    </div>
+                                `).join('')
+                                : '<p class="sem-premiacao">Sem premiações anteriores</p>'
+                            }
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn-print" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimir Relatório
+                    </button>
+                    <button class="btn-logout" onclick="limparFormularioAluno()">
+                        <i class="fas fa-redo"></i> Nova Consulta
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('resultado-aluno').innerHTML = resultadoHTML;
+            document.getElementById('resultado-aluno').style.display = 'block';
+            
+            document.getElementById('resultado-aluno').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function limparFormularioAluno() {
+            document.getElementById('nomeAluno').value = '';
+            document.getElementById('cpfAluno').value = '';
+            document.getElementById('resultado-aluno').style.display = 'none';
+            document.getElementById('erro-aluno').style.display = 'none';
+            document.getElementById('nomeAluno').focus();
+        }
+
+        // Focar no campo de nome ao carregar
+        window.onload = function() {
+            document.getElementById('nomeAluno').focus();
+            console.log("🚀 Sistema totalmente carregado e pronto!");
+        };
+    </script>
+</body>
+</html>
